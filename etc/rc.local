@@ -1,0 +1,30 @@
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+# スピーカーを有効にする
+/usr/bin/gpio mode 17 alt3;
+/usr/bin/gpio mode 30 out;
+/usr/bin/gpio write 30 0; # スピーカー有効
+
+# ドックの白色LEDインジケータを点灯する
+/usr/bin/gpio mode 25 out;
+/usr/bin/gpio write 25 1; # 点灯
+
+# 起動音を再生する
+# 注：音声データ形式は Signed 16 bit Little Endian, Rate 44100 Hz, Stereo である必要があります
+# /usr/bin/aplay -Dhw:0,0 /home/pi/xxx.wav # xxx.wav を適宜書き換えてください
+
+# Arduino サブシステムをリセットする
+/bin/stty --file /dev/ttyAMA0 -hupcl
+
+exit 0
