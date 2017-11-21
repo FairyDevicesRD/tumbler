@@ -1,5 +1,5 @@
 # libtumbler
-Hardware module contol library for Fairy I/O Tumbler
+Hardware contol library for Fairy I/O Tumbler
 
 ## 概要
 
