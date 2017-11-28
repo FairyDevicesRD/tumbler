@@ -22,7 +22,7 @@
 
 # 起動音を再生する
 # 注：音声データ形式は Signed 16 bit Little Endian, Rate 44100 Hz, Stereo である必要があります
-# /usr/bin/aplay -Dhw:0,0 /home/pi/xxx.wav # xxx.wav を適宜書き換えてください
+# /usr/bin/aplay -Dhw:0,0 /opt/FairyDevices/wav/startup.wav 
 
 # Arduino サブシステムをリセットする
 /bin/stty --file /dev/ttyAMA0 -hupcl
