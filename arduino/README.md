@@ -15,3 +15,5 @@ Tumbler にプリインストールされている Arduino 開発環境が前提
 $ make
 $ make upload reset_stty
 ``````````
+
+これにより、スケッチがビルドされ Arduino に転送されて自動的に起動します。
