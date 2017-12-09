@@ -1,3 +1,5 @@
+[![Apache License](http://img.shields.io/badge/license-APACHE2-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
+
 # tumbler
 This repository contains startup scripts, audio files and arduino sketch.
 
