@@ -1,6 +1,8 @@
 #
 # 1ch-16ch Micrpohone Position Data (milli-meter unit) for Fairy I/O Tumbler T-01
 #
+# https://github.com/FairyDevicesRD/tumbler/blob/master/hardware_api/microphone/microphone_positions/README.md
+#
 # (1) 座標系について
 #
 # 下の座標データは、下記で定義される座標系での座標値（単位ミリメートル）です。
