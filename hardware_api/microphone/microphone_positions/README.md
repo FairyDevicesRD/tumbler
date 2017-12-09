@@ -12,4 +12,4 @@ T-01 は 16 個のマイクを搭載しています。各マイクは下図の�
 
 ### 座標データ
 
-`microphone_positions.txt` に、上図の場合の座標データを保存しています。
+[microphone_positions.txt](https://github.com/FairyDevicesRD/tumbler/blob/master/hardware_api/microphone/microphone_positions/microphone_positions.txt) に、上図の場合の座標データを保存しています。
