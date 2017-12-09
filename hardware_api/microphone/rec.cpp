@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 
 	// 終了
 	serialPutchar(control, '0'); // 録音終了コマンド
+	serialClose(control);
 	fclose(stream);
 	fclose(outputfile);
 	std::cout << "recording normally finished." << std::endl;
