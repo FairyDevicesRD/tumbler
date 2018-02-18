@@ -110,7 +110,6 @@ void Speaker::batchPlay(const std::vector<short>& audio, int rate, float volume,
 {
 	state_.store(true);
 	auto th = std::thread([&](int rate, float volume, Speaker::PlayBackMode mode){
-		std::cout << "prepare audio play" << std::endl;
 		if(rate_.load() != rate){
 			close();
 			init(rate);
@@ -119,7 +118,6 @@ void Speaker::batchPlay(const std::vector<short>& audio, int rate, float volume,
 		for(size_t i=0;i<audio.size();++i){
 			if(max_value < std::abs(audio[i])) max_value = std::abs(audio[i]);
 		}
-		std::cout << "mv=" << max_value << std::endl;
 		size_t size = audio.size()*2;
 		std::vector<short> stereoaudio(size*2,0);
 		int j=0;
@@ -127,11 +125,9 @@ void Speaker::batchPlay(const std::vector<short>& audio, int rate, float volume,
 			stereoaudio[i] = static_cast<float>(audio[j]) / static_cast<float>(max_value) * 32766 * volume;
 			++j;
 		}
-		std::cout << "play audio, " << stereoaudio.size() << std::endl;
 		snd_pcm_prepare(pcm_handle_);
 		snd_pcm_writei(pcm_handle_, stereoaudio.data(), stereoaudio.size()/2);
 		state_.store(false);
-		std::cout << "played audio, " << stereoaudio.size() << std::endl;
 	},  rate, volume, mode);
 	th.detach();
 }
