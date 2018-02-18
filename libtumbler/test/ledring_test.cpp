@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 		LEDRing& ring = LEDRing::getInstance();
 		ring.clearFrames();
 		LED background(0,0,100);
-		for(int rot = 0; rot < 10; ++rot){ // 10 回転
+		for(int rot = 0; rot < 5; ++rot){ // 5 回転
 			for(int i=0;i<18;++i){
 				Frame frame(background);
 				frame.setLED(i, LED(255,0,0));
