@@ -6,6 +6,6 @@ lib_LTLIBRARIES = libtumbler.la
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = tumbler.pc
 libtumbler_la_LDFLAGS = -L/usr/local/lib -no-undefined -version-info @SHARED_VERSION_INFO@ @SHLIB_VERSION_ARG@
-libtumbler_la_LIBADD = -lm
+libtumbler_la_LIBADD = -lm -lasound
 libtumbler_la_SOURCES = tumbler.cpp ledring.cpp speaker.cpp
 
