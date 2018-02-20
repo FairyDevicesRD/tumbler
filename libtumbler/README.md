@@ -22,7 +22,7 @@ libtumbler は、Tumbler の各サブシステムを制御するためのライ�
 #### 必須
 
 - Wiring Pi (wiringpi) 2.4 以上
-- ALSA (libasound2-dev) 1.0 以上
+- ALSA library (libasound2-dev) 1.0 以上
 
 ### ビルド
 
