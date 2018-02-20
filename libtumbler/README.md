@@ -15,11 +15,20 @@ libtumbler は、Tumbler の各サブシステムを制御するためのライ�
 - タッチセンサ
 - 環境センサ
 
-## ビルド
+## 構築
+
+### 依存ライブラリ
+
+#### 必須
+
+- Wiring Pi (wiringpi) 2.4 以上
+- ALSA (libasound2-dev) 1.0 以上
+
+### ビルド
 
 ``````````{.cpp}
 $ autoreconf -vif
-$ ./configure --prefix=(任意のインストール先)
+$ ./configure
 $ make
 $ make check 
 $ make install
