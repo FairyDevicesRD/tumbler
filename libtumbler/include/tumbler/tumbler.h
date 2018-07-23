@@ -13,7 +13,10 @@
 #include <vector>
 #include <string>
 #include <mutex>
+#include <future>
 #include <stdexcept>
+#include <wiringPi.h>
+#include <wiringSerial.h>
 
 namespace tumbler
 {
@@ -56,6 +59,14 @@ namespace tumbler
 		int read(char* buf, int length);
 
 		/**
+		 * @brief 改行文字まで Arduino Subsystem へのシリアル通信路から読み出す
+		 * @param [out] buf 読み出しバッファ
+		 * @param [in] length 読み出しバッファ長（byte）
+		 * @return 実際の読み出し長（byte）
+		 */
+		int readline(char* buf, int length);
+
+		/**
 		 * @brief ロックを取得し Arduino Subsystem へのシリアル通信路へ書き込む
 		 * @param [out] buf 書き込みバッファ
 		 * @param [in] length 書き込みバッファ長（byte）
@@ -70,10 +81,33 @@ namespace tumbler
 		void hardReset();
 
 		/**
+		 * @brief シリアル受信バッファが溜まっているか確認する.
+		 */
+		int serialAvail(){ return serialDataAvail(serial_);}
+
+		/**
+		 * @brief シリアル受信した内容でデータを更新する.
+		 */
+		int update(char* data, int datasize);
+
+		/**
+		 * @brief シリアル受信スレッドの開始／終了／一時停止など.
+		 * @param コールバック関数
+		 */
+		int callBackState;
+		int startCallBack(void (*callbackFnc)(char*,int));
+		int stopCallBack();
+		int waitCallBack();
+		int restartCallBack();
+		int getCallBackState(){return callBackState;}
+		
+		
+		/**
 		 * @brief read/write をまとめて外部からロックする
 		 */
 		std::mutex global_lock_;
 
+		void flush();
 	private:
 		ArduinoSubsystem();
 		~ArduinoSubsystem();
@@ -82,6 +116,8 @@ namespace tumbler
 		void connectionOpen();
 		void connectionClose();
 
+
+		std::future<int> callbackAsync_;
 		int serial_;
 	};
 

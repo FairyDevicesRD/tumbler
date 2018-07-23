@@ -6,14 +6,15 @@
  */
 
 #include <iostream>
+#include <unistd.h>
 #include "tumbler/tumbler.h"
 #include "tumbler/ledring.h"
 
 int main(int argc, char** argv)
 {
-    using namespace tumbler;
-    {
-        // 青点灯
+	using namespace tumbler;
+	{
+		// 青点灯
 		Frame frame;
 		for(int i=0;i<18;++i){
 			frame.setLED(i, LED(0,0,255));
@@ -21,8 +22,9 @@ int main(int argc, char** argv)
 		LEDRing& ring = LEDRing::getInstance();
 		ring.addFrame(frame);
 		ring.show(false); // 同期
-    }
-    {
+		sleep(1);
+	}
+	{
 		// R->G->B の順に点灯
 		std::vector<Frame> frames(3);
 		for(int i=0;i<18;++i){
@@ -34,25 +36,35 @@ int main(int argc, char** argv)
 		ring.setFrames(frames);
 		ring.setFPS(1);
 		ring.show(false); // 同期
-    }
-    {
-    	// 回転
+	}
+	{
+		// 回転
 		LEDRing& ring = LEDRing::getInstance();
 		ring.clearFrames();
 		LED background(0,0,100);
-		for(int rot = 0; rot < 5; ++rot){ // 5 回転
+		for(int rot = 0; rot < 3; ++rot){ // 3 回転
 			for(int i=0;i<18;++i){
 				Frame frame(background);
 				frame.setLED(i, LED(255,0,0));
 				ring.addFrame(frame);
 			}
 		}
-		ring.setFPS(30);
-    	ring.show(false);
-    }
+		ring.setFPS(10);
+		ring.show(false);
+	}
+
+	{
+		// パターン
+		LEDRing& ring = LEDRing::getInstance();
+		ring.clearFrames();
+		ring.motion(false, 1, 0, 255, 0, 0);
+		sleep(5);
+		ring.motion(false, 2, 2, 0, 255, 0);
+		sleep(5);
+	}
 
 	LEDRing& ring = LEDRing::getInstance();
-	ring.reset(false); // 非同期でリセットし終了
+	ring.reset(false); // リセットし終了
 	return 0;
 }
 

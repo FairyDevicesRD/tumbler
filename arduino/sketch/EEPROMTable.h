@@ -1,0 +1,21 @@
+// MAX:3FF
+#define EEP_POS_VERSION_MJR    0x000
+#define EEP_POS_VERSION_MNR    0x001
+#define EEP_POS_INIT_FLG       0x002
+
+#define EEP_POS_CS_THRESH      0x010
+#define EEP_POS_CS_THRESH_1    0x010
+#define EEP_POS_CS_THRESH_2    0x012
+#define EEP_POS_CS_THRESH_3    0x014
+#define EEP_POS_CS_THRESH_4    0x016
+#define EEP_POS_CS_TOUCH_SHORT 0x018
+#define EEP_POS_CS_TOUCH_LONG  0x01A
+
+#define EEP_POS_BME_TMP        0x020
+#define EEP_POS_BME_HUM        0x022
+#define EEP_POS_BME_PRS        0x024
+
+#define EEP_POS_BME_COEF_TMP   0x026
+#define EEP_POS_BME_COEF_HUM   0x028
+#define EEP_POS_BME_COEF_PRS   0x02A
+

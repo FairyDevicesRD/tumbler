@@ -135,6 +135,33 @@ public:
 	 */
 	int reset(bool async);
 
+	/**
+	 * @brief LED リングをリセットし、任意の色で点灯させる
+	 * @param [in] async true の場合リセットを非同期的に実行する。非同期実行の場合、この関数は 0 を返しリセットの完了を待たずに処理を返す。
+	 * @return リセット成功の場合 0、失敗の場合 1 が返される
+	 */
+	int set(bool async, uint8_t r_, uint8_t g_, uint8_t b_);
+	
+	/**
+	 * @brief LED リングの任意の1点を点灯させる
+	 * @param [in] async true の場合リセットを非同期的に実行する。非同期実行の場合、この関数は 0 を返しリセットの完了を待たずに処理を返す。
+	 * @return リセット成功の場合 0、失敗の場合 1 が返される
+	 */
+	int setOne(bool async, uint8_t led_, uint8_t r_, uint8_t g_, uint8_t b_);
+	
+	/**
+	 * @brief LED リングをタッチセンサーに合わせて点灯させる
+	 * @param [in] async true の場合リセットを非同期的に実行する。非同期実行の場合、この関数は 0 を返しリセットの完了を待たずに処理を返す。
+	 */
+	int touch(bool async);
+  
+	/**
+	 * @brief LED リングをArduino内臓の動作パターンで点灯させる
+	 * @param [in] motion 0:停止、1:回転、2:逆回転
+	 * @param [in] colVar 0:部分点灯、1:6点点灯、2:3点点灯
+	 */
+	int motion(bool async, uint8_t motion, uint8_t colVar, uint8_t r_, uint8_t g_, uint8_t b_);
+	
 private:
 
 	LEDRing();
@@ -145,6 +172,7 @@ private:
 	int fps_;
 	std::future<int> resetAsync_;
 	std::future<int> showAsync_;
+	std::future<int> touchAsync_;
 };
 
 }

@@ -15,7 +15,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *	 http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,19 +52,19 @@ std::vector<short> FileReader(const std::string& filename)
 
 int main(int argc, char** argv)
 {
-    using namespace tumbler;
+	using namespace tumbler;
 	std::vector<short> audio = FileReader("data/test1.raw");
 	std::vector<short> ad;
-	for(int i=0;i<audio.size();++i){
+	for(uint i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
-	for(int i=0;i<audio.size();++i){
+	for(uint i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
-	for(int i=0;i<audio.size();++i){
+	for(uint i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
-    {
+	{
 		std::cout << "Initialize ALSA 1" << std::endl;
 		Speaker& spk = Speaker::getInstance();
 		std::cout << "Batch Play..." << std::endl;
@@ -73,9 +73,9 @@ int main(int argc, char** argv)
 		while(spk.state()){
 			usleep(1000*100);
 		}
-    }
-    sleep(10);
-    {
+	}
+	sleep(10);
+	{
 		std::cout << "Initialize ALSA 2" << std::endl;
 		Speaker& spk = Speaker::getInstance();
 		std::cout << "Batch Play..." << std::endl;
@@ -84,8 +84,8 @@ int main(int argc, char** argv)
 		while(spk.state()){
 			usleep(1000*100);
 		}
-    }
+	}
 
-    return 0;
+	return 0;
 }
 

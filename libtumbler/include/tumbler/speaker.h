@@ -83,7 +83,7 @@ private:
 	~Speaker();
 	Speaker &operator=(const Speaker&);
 
-    std::mutex mutex_;
+	std::mutex mutex_;
 	snd_pcm_t* pcm_handle_;
 	snd_pcm_hw_params_t* pcm_params_;
 	std::atomic<int> rate_;
