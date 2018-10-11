@@ -5,20 +5,20 @@
  * @author Masato Fujino, created on: 2017/11/21 
  */
 
-#include "tumbler/tumbler.h"
+#include <wiringSerial.h>
 
 #include <iostream>
 #include <unistd.h>
 #include <stdlib.h>
 #include <syslog.h>
 #include <sstream>
-#include <wiringSerial.h>
 #include <termios.h>
 #include <mutex>
 #include <future>
 #include <thread>
 #include <string.h>
 
+#include "tumbler/tumbler.h"
 #include "tumbler/bme.h"
 #include "tumbler/touch.h"
 
@@ -205,9 +205,14 @@ int ArduinoSubsystem::write(const char* buf, int length)
 	return ::write(serial_, buf, length);
 }
 
+int ArduinoSubsystem::serialAvail()
+{
+	return serialDataAvail(serial_);
+}
+
 void ArduinoSubsystem::connectionOpen()
 {
-	int baudrate = 19200;
+	int baudrate = 9600;
 //	int baudrate = 38400;
 	serial_ = serialOpen("/dev/ttyAMA0",baudrate);
 	if(serial_ < 0){

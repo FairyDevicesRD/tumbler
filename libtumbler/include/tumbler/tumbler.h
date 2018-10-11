@@ -15,8 +15,6 @@
 #include <mutex>
 #include <future>
 #include <stdexcept>
-#include <wiringPi.h>
-#include <wiringSerial.h>
 
 namespace tumbler
 {
@@ -83,7 +81,7 @@ namespace tumbler
 		/**
 		 * @brief シリアル受信バッファが溜まっているか確認する.
 		 */
-		int serialAvail(){ return serialDataAvail(serial_);}
+		int serialAvail();
 
 		/**
 		 * @brief シリアル受信した内容でデータを更新する.
