@@ -49,7 +49,7 @@ void setup()
 {
   // 通信系の開始（グローバル変数として利用されるが、利用の仕方には注意）
   //Serial.begin(57600);  
-  Serial.begin(19200);  
+  Serial.begin(9600);  
   // 38400 bps, 4800 byte/sec, 48 byte/10msec(=100fps)
   // 19200 bps, 2400 byte/sec  60 byte /25msec(=40fps)
   while(!Serial){
