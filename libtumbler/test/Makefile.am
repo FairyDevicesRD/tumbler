@@ -13,8 +13,8 @@ speaker_test_SOURCES = speaker_test.cpp
 speaker_test_LDADD  = $(top_srcdir)/src/tumbler.o
 speaker_test_LDADD += $(top_srcdir)/src/speaker.o -lasound
 
-TESTS = buttons_test
-check_PROGRAMS = buttons_test
+TESTS += buttons_test
+check_PROGRAMS += buttons_test
 buttons_test_SOURCES = buttons_test.cpp
 buttons_test_LDADD  = $(top_srcdir)/src/tumbler.o
 buttons_test_LDADD += $(top_srcdir)/src/buttons.o -lasound
