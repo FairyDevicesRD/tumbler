@@ -74,17 +74,6 @@ int main(int argc, char** argv)
 			usleep(1000*100);
 		}
     }
-    sleep(10);
-    {
-		std::cout << "Initialize ALSA 2" << std::endl;
-		Speaker& spk = Speaker::getInstance();
-		std::cout << "Batch Play..." << std::endl;
-		spk.batchPlay(ad, 44100, 0.05, Speaker::PlayBackMode::overwrite_);
-		std::cout << "Batch End..." << std::endl;
-		while(spk.state()){
-			usleep(1000*100);
-		}
-    }
 
     return 0;
 }

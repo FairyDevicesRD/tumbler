@@ -65,6 +65,11 @@ int ArduinoSubsystem::write(const char* buf, int length)
 	return ::write(serial_, buf, length);
 }
 
+int ArduinoSubsystem::dataAvail()
+{
+	return serialDataAvail(serial_);
+}
+
 void ArduinoSubsystem::connectionOpen()
 {
 	int baudrate = 19200;

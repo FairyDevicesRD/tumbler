@@ -1,5 +1,9 @@
 namespace sonar{
 
+	/**
+	 * @struct ColorStruct
+	 * @brief RGB 色定義
+	 */
 	typedef struct ColorStruct
 	{
 		ColorStruct(): r_(0), g_(0), b_(0) {}
@@ -9,9 +13,16 @@ namespace sonar{
 		uint8_t b_;
 	} Color;
 
+	/**
+	 * @struct FrameBufferStruct
+	 * @brief １フレームの定義。LED リングには 18 個の LED が実装されており、18 個全ての色の定義がなされたデータ
+	 */
 	typedef struct FrameBufferStruct
 	{
 		FrameBufferStruct(){}
+		/**
+		 * @brief 色定義を LED 1 個分、時計回りに回転させる
+		 */
 		void incr()
 		{
 			Color c17 = led_[17];
@@ -26,6 +37,7 @@ namespace sonar{
 	/**
 	 * @class LEDRing
 	 * @brief LED リングを表現するクラス
+	 * @see sonar::Module
 	 */
 	class LEDRing : public Module
 	{
@@ -33,7 +45,8 @@ namespace sonar{
 
 		/**
 		 * @brief C'tor
-		 * @param [in] 明るさを周辺明度に合わせて自動調整する
+		 * @param [in] 明るさを周辺明度に合わせて自動調整する（未実装機能）
+		 * @todo 周辺明度自動調整機能の実装
 		 */
 		LEDRing(bool auto_luminance_adaptation) :
 			Module("LEDRing"),
@@ -41,7 +54,11 @@ namespace sonar{
 			mode_(0)
 		{}
 
-
+		/**
+		 * @brief 初期化関数
+		 * @details LED 点灯デフォルトパターンを設定する
+		 * @return 0 if success
+		 */
 		int8_t init() override
 		{			
 			//Serial.print("LED ring initializing ...");
@@ -54,12 +71,18 @@ namespace sonar{
 			return 0;
 		}
 
-
+		/**
+		 * @brief アップデート関数
+		 * @param [in] frames フレーム番号
+		 * @return 0 if success
+		 * @details mode_ に従って、アップデート処理を分岐する、分岐内容は実装を参照
+		 */
 		int8_t update(uint32_t frames) override
 		{
 			switch(mode_){
 			case 0:
 				{
+					// ダブルバッファリングでのデフォルトパターンの点灯
 					FrameBuffer foregroundFrameBuffer = backgroundFrameBuffer_;
 					for(int i=0;i<18;i++){
 						ring_.setPixelColor(i,
@@ -68,7 +91,8 @@ namespace sonar{
 														foregroundFrameBuffer.led_[i].b_));
 					}
 					ring_.show();
-					if(frames % 50 == 0){
+					// アニメーションは、内部カウントアップされるフレーム数によって内部的に継続される
+					if(frames % 25 == 0){
 						backgroundFrameBuffer_.incr(); // 固定パターンインクリメントによる単純回転
 					}
 				}
@@ -80,6 +104,7 @@ namespace sonar{
 				break;
 			case 8:
 				{
+					// 外部制御モード、外部指示に基づく点灯（すなわちアニメーションについても外部指示に基づく）
 					FrameBuffer foregroundFrameBuffer = backgroundFrameBuffer_;
 					for(int i=0;i<18;i++){
 						ring_.setPixelColor(i,
@@ -96,6 +121,14 @@ namespace sonar{
 			return 0;
 		}
 
+		/**
+		 * @brief 通信（外部からの命令）の解釈
+		 * @param [in] type 命令タイプ
+		 * @param [in] subtype 命令サブタイプ
+		 * @param [in] body 命令ボディ
+		 * @param [in] length 命令ボディの長さ
+		 * @return 0 if success
+		 */
 		int8_t recv(const char* type, uint8_t subtype, const char* body, uint8_t length) override
 		{
 			if(strcmp(type, "LEDR") == 0){
@@ -114,6 +147,7 @@ namespace sonar{
 						clear();
 						mode_ = 1;
 					}
+					break;
 				case 2:					
 					{
 						// ダイレクト制御（指定点灯）

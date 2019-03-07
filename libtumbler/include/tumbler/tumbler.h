@@ -69,6 +69,8 @@ namespace tumbler
 		 */
 		void hardReset();
 
+		int dataAvail();
+
 		/**
 		 * @brief read/write をまとめて外部からロックする
 		 */
