@@ -35,25 +35,41 @@
 namespace tumbler
 {
 
-enum class ButtonState
+/**
+ * @class ButtonState
+ * @brief 各タッチボタンのセンシング状態
+ */
+enum class DLL_PUBLIC ButtonState
 {
-	none_,
-	pushed_,
-	slided_,
+	none_,    //!< 何も検知されていない状態
+	pushed_,  //!< 指の接触が検知された状態
+	released_,//!< 接触検知状態から、指が離された状態（pushed_ ステートからの変化として 1 回のみ呼ばれ、以降は none_ ステートになる）
 };
 
-using ButtonStateCallback = void (*)(std::vector<ButtonState>);
+/**
+ * @class ButtonInfo
+ * @brief 各タッチボタンのセンシング状態の詳細
+ * @note ユーザーアプリケーションで利用することはほぼありません
+ */
+class DLL_PUBLIC ButtonInfo
+{
+public:
+	std::vector<int> baselines_;  //!< 各タッチボタンのベースライン補正値（非接触状態の測定値）
+	std::vector<int> corrValues_; //!< ベースライン補正値を減算した各タッチボタンの補正済計測値
+};
+
+using ButtonStateCallback = void (*)(std::vector<ButtonState>, ButtonInfo, void*);
 
 class DLL_PUBLIC Buttons
 {
 public:
-	static Buttons& getInstance(void (*)(std::vector<ButtonState>));
+	static Buttons& getInstance(ButtonStateCallback func, void* userdata);
 
 	void start();
 	void stop();
 
 private:
-	Buttons(ButtonStateCallback);
+	Buttons(ButtonStateCallback, void*);
 	Buttons(const Buttons&);
 	Buttons &operator=(const Buttons&);
 	ArduinoSubsystem& subsystem_;
@@ -61,7 +77,7 @@ private:
 	std::future<int> monitor_;
 	std::atomic<bool> stopflag_;
 	bool status_;
-	int baseline_; // 内部補正用
+	void* userdata_;
 };
 
 }

@@ -165,14 +165,13 @@ public:
 
 	/**
 	 * @brief ブランチ間互換性維持のためのユーティリティ関数
-	 * @deprecated この関数は、次期アップデートで廃止される可能性があります。利用しないことを推奨します。
+	 * @deprecated この関数は、１年程度の互換性猶予期間を以て、次期アップデートで廃止される可能性があります。利用しないことを推奨します。
 	 */
 	int set(bool async, uint8_t r, uint8_t g, uint8_t b);
 
 	/**
 	 * @brief ブランチ間互換性維持のためのユーティリティ関数
-	 * @deprecated この関数は、次期アップデートで廃止される可能性があります。利用しないことを強く推奨します。
-	 * @attention この関数を複数回呼び出して LED リングの複数位置の LED を点灯制御することは非効率であり、通信に負荷を掛けるためシステムの安定性を損ないます。その代わりに Frame クラスを利用してください。
+	 * @deprecated この関数は、１年程度の互換性猶予期間を以て、次期アップデートで廃止される可能性があります。利用しないことを推奨します。
 	 */
 	int setOne(bool async, uint8_t index, uint8_t r, uint8_t g, uint8_t b);
 
@@ -187,7 +186,7 @@ private:
 	std::future<int> resetAsync_;
 	std::future<int> showAsync_;
 	std::future<int> motionAsync_;
-	Frame currentFrame_; // 最終フレーム状態（LED リングの点灯状態は他のセンサーに影響を与える場合があるため保持しておく）
+	Frame currentFrame_;
 };
 
 }

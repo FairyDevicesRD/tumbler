@@ -7,3 +7,7 @@ bin_PROGRAMS =
 bin_PROGRAMS+=buttons
 buttons_SOURCES=buttons.cpp
 buttons_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+
+#bin_PROGRAMS+=buttons2
+#buttons2_SOURCES=buttons2.cpp
+#buttons2_LDADD=$(top_srcdir)/src/.libs/libtumbler.la

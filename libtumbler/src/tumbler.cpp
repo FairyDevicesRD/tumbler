@@ -52,6 +52,7 @@ void ArduinoSubsystem::hardReset()
 ArduinoSubsystem::ArduinoSubsystem()
 {
 	openlog("libtumbler", LOG_PID, LOG_USER);
+	c_status_ledringChange_.store(false);
 	connectionOpen();
 }
 

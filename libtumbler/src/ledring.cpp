@@ -10,6 +10,7 @@
 #include <mutex>
 #include <future>
 #include <thread>
+#include <iostream>
 
 namespace tumbler{
 
@@ -71,8 +72,9 @@ static int LEDRing_resetImpl_()
 {
 	char ack[8];
 	int readlen = 0;
+	ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
+	subsystem.c_status_ledringChange_.store(true);
 	{
-		ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
 		std::lock_guard<std::mutex> lock(subsystem.global_lock_);
 		subsystem.write("LEDR",4);
 		const uint8_t subtype = 0; // v1.0 ではデフォルト回転、v1.1 から消灯へ
@@ -95,10 +97,11 @@ static int LEDRing_showImpl_(const std::vector<Frame>& frames, int fps)
 	char txdata[128];
 	char ack[8];
 	int readlen = 0;
+	ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
+	subsystem.c_status_ledringChange_.store(true);
 	for(size_t i=0;i<frames.size();++i){
 		const uint8_t length = frames[i].toDataForTx(txdata);
 		{
-			ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
 			std::lock_guard<std::mutex> lock(subsystem.global_lock_);
 			subsystem.write("LEDR", 4);
 			const uint8_t subtype = 8; // 外部制御アニメーションモード
@@ -126,8 +129,9 @@ static int LEDRing_motionImpl_(uint8_t motion, const Frame& frame)
 	int readlen = 0;
 	const uint8_t data_length = frame.toDataForTx(txdata);
 	const uint8_t comm_length = data_length + 1;
+	ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
+	subsystem.c_status_ledringChange_.store(true);
 	{
-		ArduinoSubsystem& subsystem = ArduinoSubsystem::getInstance();
 		std::lock_guard<std::mutex> lock(subsystem.global_lock_);
 		subsystem.write("LEDR",4);
 		const uint8_t subtype = 1; // v1.1 から新設、組み込みアニメーションモード
@@ -176,6 +180,7 @@ int LEDRing::reset(bool async)
 
 int LEDRing::motion(bool async, uint8_t animationPattern, const Frame& frame)
 {
+
 	if(async){
 		motionAsync_ = std::async(std::launch::async, LEDRing_motionImpl_, animationPattern, frame);
 		return 0;

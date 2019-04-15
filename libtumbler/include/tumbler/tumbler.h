@@ -14,6 +14,7 @@
 #include <string>
 #include <mutex>
 #include <stdexcept>
+#include <atomic>
 
 namespace tumbler
 {
@@ -37,7 +38,7 @@ namespace tumbler
 	 * @class ArduinoSubsystem
 	 * @brief Arduino Subsystem へのシリアル通信路を保持するシングルトンクラスであり、送受信を排他制御する
 	 */
-	class ArduinoSubsystem
+	class DLL_PUBLIC ArduinoSubsystem
 	{
 	public:
 		/**
@@ -76,6 +77,12 @@ namespace tumbler
 		 */
 		std::mutex global_lock_;
 
+		/**
+		 * @brief LED リングの変化状態の共有ステータス
+		 * @details LEDRing クラスで書き込まれ、Button クラスでチェック後書き換えられる
+		 */
+		std::atomic<bool> c_status_ledringChange_;
+
 	private:
 		ArduinoSubsystem();
 		~ArduinoSubsystem();
@@ -94,7 +101,7 @@ namespace tumbler
 	 * \~japanese-en
 	 * @brief 時刻計測クラス. 時刻計測を行いたいブロックの前後に start() と stop() を組み合わせて使う。stop() は、start() が呼び出された時刻からの経過時間を返す. このクラスは、start() と stop() の複数回の呼び出しに対応する複数個の経過時間を積算している。積算経過時間は total() 関数により得られる。
 	 */
-	class Timer{
+	class DLL_PUBLIC Timer{
 	public:
 		Timer() : sum_microsec_(0), status_(false) {}
 
@@ -129,6 +136,25 @@ namespace tumbler
 			sum_microsec_ += microsec;
 			status_ = false;
 			return msec;
+		}
+
+		float tick()
+		{
+			if(!status_){
+				throw std::runtime_error("time is not started.");
+			}
+			auto end = std::chrono::system_clock::now();
+			float msec = std::chrono::duration_cast<std::chrono::milliseconds>(end - start_).count();
+			float microsec = std::chrono::duration_cast<std::chrono::microseconds>(end - start_).count();
+			return msec;
+		}
+
+		void reset()
+		{
+			if(status_){
+				stop();
+			}
+			sum_microsec_ = 0;
 		}
 
 		/**

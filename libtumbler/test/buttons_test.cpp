@@ -72,8 +72,7 @@ void ButtonStateFunc(std::vector<ButtonState> state)
 
 int main(int argc, char** argv)
 {
-	Buttons& buttons = Buttons::getInstance(ButtonStateFunc);
-
+	Buttons& buttons = Buttons::getInstance(ButtonStateFunc, nullptr);
     buttons.start();
     sleep(10);
     buttons.stop();
