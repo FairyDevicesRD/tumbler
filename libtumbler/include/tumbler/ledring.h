@@ -50,7 +50,6 @@ public:
 	 * @param [in] background バックグラウンド LED 色定義
 	 */
 	explicit Frame(const LED& background);
-	Frame(const Frame& f);
 
 	/**
 	 * @brief フレームに LED 色定義をセットする
@@ -111,6 +110,13 @@ public:
 	void clearFrames() { frames_.clear(); }
 
 	/**
+	 * @brief LED リングの現在の点灯状態を取得する
+	 * @details LEDRing クラスに登録されているフレーム定義ではなく、実際に LED リング上で点灯している最終のフレーム状態を返す。アニメーション
+	 * @return LED リングの点灯状態
+	 */
+	Frame getCurrentFrame() const { return currentFrame_; }
+
+	/**
 	 * @brief 描画 FPS（Frame Per Second）をセットする
 	 * @note セットされた FPS は要求 FPS であり、大きすぎる FPS は再現されない
 	 * @param [in] fps FPS
@@ -129,11 +135,46 @@ public:
 	int show(bool async);
 
 	/**
-	 * @brief LED リングをリセットし、初期表示状態に戻す
-	 * @param [in] async true の場合リセットを非同期的に実行する。非同期実行の場合、この関数は 0 を返しリセットの完了を待たずに処理を返す。
+	 * @brief LED リングをリセットする（LED リングを消灯し、本クラスに登録されているフレームを clearFrames() する）。
+	 * @param [in] async true の場合リセット命令を非同期的に実行する。非同期実行の場合、処理の完了を待たずにこの関数は 0 を返す。
 	 * @return リセット成功の場合 0、失敗の場合 1 が返される
 	 */
 	int reset(bool async);
+
+	/**
+	 * @brief シングルフレームを指定し、LED リングを Arduino サブシステムに組み込まれた特定のアニメーションパターンで直接点灯させる。
+	 * @param [in] async true の場合、点灯命令を非同期的に実行する。非同期実行の場合、処理の完了を待たずにこの関数は 0 を返す。
+	 * @param [in] animationPattern 組み込みアニメーションパターンの指定（0:停止、1:回転、2:逆回転）
+	 * @param [in] frame フレーム
+	 * @return 成功の場合 0 を返す
+	 */
+	int motion(bool async, uint8_t animationPattern, const Frame& frame);
+
+	/**
+	 * @brief 組み込み点灯位置と色（単一色）を指定し、LED リングを Arduino サブシステムに組み込まれた特定の点灯パターンで直接点灯させる。
+	 * @details 任意の点灯位置と複数色を指定したいときは、もうひとつのオーバーロード関数を利用してください。この関数は、ブランチ間互換性維持のためのユーティリティ関数です。
+	 * @param [in] async true の場合、点灯命令を非同期的に実行する。非同期実行の場合、処理の完了を待たずにこの関数は 0 を返す。
+	 * @param [in] animationPattern 組み込みアニメーションパターンの指定（0:停止、1:回転、2:逆回転）
+	 * @param [in] position 組み込み点灯位置の指定（0:部分点灯、1:6点点灯、2:3点点灯）
+	 * @param [in] r 点灯色（赤）
+	 * @param [in] g 点灯色（緑）
+	 * @param [in] b 点灯色（青）
+	 * @return 成功の場合 0 を返す
+	 */
+	int motion(bool async, uint8_t animationPattern, uint8_t position, uint8_t r, uint8_t g, uint8_t b);
+
+	/**
+	 * @brief ブランチ間互換性維持のためのユーティリティ関数
+	 * @deprecated この関数は、次期アップデートで廃止される可能性があります。利用しないことを推奨します。
+	 */
+	int set(bool async, uint8_t r, uint8_t g, uint8_t b);
+
+	/**
+	 * @brief ブランチ間互換性維持のためのユーティリティ関数
+	 * @deprecated この関数は、次期アップデートで廃止される可能性があります。利用しないことを強く推奨します。
+	 * @attention この関数を複数回呼び出して LED リングの複数位置の LED を点灯制御することは非効率であり、通信に負荷を掛けるためシステムの安定性を損ないます。その代わりに Frame クラスを利用してください。
+	 */
+	int setOne(bool async, uint8_t index, uint8_t r, uint8_t g, uint8_t b);
 
 private:
 
@@ -145,6 +186,8 @@ private:
 	int fps_;
 	std::future<int> resetAsync_;
 	std::future<int> showAsync_;
+	std::future<int> motionAsync_;
+	Frame currentFrame_; // 最終フレーム状態（LED リングの点灯状態は他のセンサーに影響を与える場合があるため保持しておく）
 };
 
 }

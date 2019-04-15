@@ -30,7 +30,17 @@ namespace sonar{
 				led_[i] = led_[i-1]; // LED17<-LED16, LED16<-LED15, ... LED1<-LED0, 
 			}
 			led_[0] = c17; // LED0<-LED17(backup)
-		}		
+		}
+
+		void decr()
+		{
+			Color c0 = led_[0];
+			for(int i=0;i<17;++i){
+				led_[i] = led_[i+1]; // LED0<-LED1, LED1<-LED2, ... LED16<-LED17,
+			}
+			led_[17] = c0; // LED17<-LED0(backup)
+		}
+
 		Color led_[18];
 	} FrameBuffer;
 	
@@ -48,7 +58,7 @@ namespace sonar{
 		 * @param [in] 明るさを周辺明度に合わせて自動調整する（未実装機能）
 		 * @todo 周辺明度自動調整機能の実装
 		 */
-		LEDRing(bool auto_luminance_adaptation) :
+		LEDRing(bool auto_luminance_adaptation = false) :
 			Module("LEDRing"),
 			auto_luminance_adaptation_(auto_luminance_adaptation),
 			mode_(0)
@@ -61,13 +71,11 @@ namespace sonar{
 		 */
 		int8_t init() override
 		{			
-			//Serial.print("LED ring initializing ...");
-			setEmbededPattern(0); // デフォルトパターンをセット
 			ring_ = Adafruit_NeoPixel(18, 14, NEO_GRB+NEO_KHZ800);
 			ring_.begin();
 			ring_.setBrightness(255);
 			clear();
-			//Serial.println(" [ OK ]");
+			setEmbededPattern();
 			return 0;
 		}
 
@@ -79,10 +87,16 @@ namespace sonar{
 		 */
 		int8_t update(uint32_t frames) override
 		{
+
 			switch(mode_){
 			case 0:
 				{
-					// ダブルバッファリングでのデフォルトパターンの点灯
+					// do nothing
+				}
+				break;
+			case 1:
+				{
+					// ダブルバッファリングでの組み込みパターンの点灯
 					FrameBuffer foregroundFrameBuffer = backgroundFrameBuffer_;
 					for(int i=0;i<18;i++){
 						ring_.setPixelColor(i,
@@ -93,13 +107,12 @@ namespace sonar{
 					ring_.show();
 					// アニメーションは、内部カウントアップされるフレーム数によって内部的に継続される
 					if(frames % 25 == 0){
-						backgroundFrameBuffer_.incr(); // 固定パターンインクリメントによる単純回転
+						if(motion_ == 1){
+							backgroundFrameBuffer_.incr(); // 固定パターンインクリメントによる単純回転
+						}else if(motion_ == 2){
+							backgroundFrameBuffer_.decr(); // 固定パターンデクリメントによる単純回転
+						}
 					}
-				}
-				break;
-			case 1:
-				{
-					// do nothing
 				}
 				break;
 			case 8:
@@ -133,39 +146,31 @@ namespace sonar{
 		{
 			if(strcmp(type, "LEDR") == 0){
 				switch(subtype){
-				case 0:
+				case 0: // v1.0 で単一組み込みパターン、v1.1 から全消灯へ（外部仕様変更）
 					{
-						// 組み込みパターン
 						clear();
-						setEmbededPattern(0);
 						mode_ = 0;
 					}
 					break;
-				case 1:
+				case 1: // v1.0 では利用していなかった、v1.1 から組み込みパターンへ
 					{
-						// ダイレクト制御（全消灯）
 						clear();
 						mode_ = 1;
-					}
-					break;
-				case 2:					
-					{
-						// ダイレクト制御（指定点灯）
-						clear();
-						mode_ = 1;
-						for(uint8_t i=0;i<length;i=i+4){
-							uint8_t index = static_cast<uint8_t>(body[i]);
-							uint8_t r = static_cast<uint8_t>(body[i+1]);
-							uint8_t g = static_cast<uint8_t>(body[i+2]);
-							uint8_t b = static_cast<uint8_t>(body[i+3]);
-							Color c(r,g,b);
-							on(index,c);
+						motion_ = static_cast<uint8_t>(body[0]);
+						FrameBuffer recv_fb;
+						uint8_t index = 0;
+						for(uint8_t i=1;i<length;i=i+3){
+							uint8_t r = static_cast<uint8_t>(body[i]);
+							uint8_t g = static_cast<uint8_t>(body[i+1]);
+							uint8_t b = static_cast<uint8_t>(body[i+2]);
+							recv_fb.led_[index++] = Color(r,g,b);
 						}
+						backgroundFrameBuffer_ = recv_fb;
 					}
 					break;
 				case 8:
 					{			
-						// 外部制御モード（アニメーション用）
+						// 外部制御モード（連続アニメーション用）
 						mode_ = 8;
 						FrameBuffer recv_fb;
 						uint8_t index = 0;
@@ -190,21 +195,20 @@ private:
 		   @note ホスト起動時, 終了時等, 外部制御に頼れない場合のパターン等
 		   @param [in] mode モード番号
 		*/
-		void setEmbededPattern(int mode)
+		void setEmbededPattern()
 		{
-			mode_ = mode;
-			if(mode == 0){
-				// 起動時の表示モード
-				FrameBuffer frame;
-				double a = 0.4;
-				double b = 0.6;
-				frame.led_[4]  = Color(255,255,255); // center
-				frame.led_[3]  = Color(255,255,255);
-				frame.led_[2]  = Color(255*a*a,255*a*a,255*b);			
-				frame.led_[1]  = Color(255*a*a*a,255*a*a*a,255*b*b);			
-				frame.led_[0]  = Color(255*a*a*a*a,255*a*a*a*a,255*b*b*b);			
-				backgroundFrameBuffer_ = frame;
-			}
+			// 起動時の表示モード
+			FrameBuffer frame;
+			float a = 0.4;
+			float b = 0.6;
+			frame.led_[4]  = Color(255,255,255); // center
+			frame.led_[3]  = Color(255,255,255);
+			frame.led_[2]  = Color(255*a*a,255*a*a,255*b);
+			frame.led_[1]  = Color(255*a*a*a,255*a*a*a,255*b*b);
+			frame.led_[0]  = Color(255*a*a*a*a,255*a*a*a*a,255*b*b*b);
+			backgroundFrameBuffer_ = frame;
+			mode_ = 1; // 組み込みパターン点灯モード
+			motion_ = 1; // 単純回転
 		}
 
 		void on(int8_t index, const Color& c)
@@ -213,6 +217,9 @@ private:
 			ring_.show();
 		}
 
+		/**
+		 * @brief 全消灯
+		 */
 		void clear()
 		{
 			for(int8_t i=0;i<18;++i){
@@ -224,7 +231,9 @@ private:
 		const bool auto_luminance_adaptation_;
 		Adafruit_NeoPixel ring_;
 		FrameBuffer backgroundFrameBuffer_; // バックグラウンドフレームバッファ
-		int8_t mode_; // アニメーション動作モード
+		int8_t mode_;   // アニメーション動作モード
+		int8_t motion_; // mode_ = 1 のときのサブモード
+
 	};
 	
 }

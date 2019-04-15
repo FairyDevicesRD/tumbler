@@ -1,9 +1,9 @@
 /*
  * @file buttons_test.cpp
  * \~english
- * @brief 
+ * @brief Test program for buttns on top panel.
  * \~japanese
- * @brief 
+ * @brief トップパネルボタンのテストプログラム
  * \~ 
  * @author Masato Fujino, created on: Mar 7, 2019
  * @copyright Copyright 2019 Fairy Devices Inc. http://www.fairydevices.jp/

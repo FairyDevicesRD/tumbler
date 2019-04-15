@@ -61,6 +61,7 @@ private:
 	std::future<int> monitor_;
 	std::atomic<bool> stopflag_;
 	bool status_;
+	int baseline_; // 内部補正用
 };
 
 }

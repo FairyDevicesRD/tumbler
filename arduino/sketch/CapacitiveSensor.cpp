@@ -161,7 +161,7 @@ int CapacitiveSensor::SenseOneCycle(void)
 	delayMicroseconds(10);
 	DIRECT_MODE_INPUT(rReg, rBit);	// receivePin to input (pullups are off)
 	DIRECT_WRITE_HIGH(sReg, sBit);	// sendPin High
-    interrupts();
+    //interrupts();
 
 	while ( !DIRECT_READ(rReg, rBit) && (total < CS_Timeout_Millis) ) {  // while receive pin is LOW AND total is positive value
 		total++;
@@ -170,17 +170,18 @@ int CapacitiveSensor::SenseOneCycle(void)
 	//Serial.println(total);
 
 	if (total > CS_Timeout_Millis) {
+		interrupts();
 		return -2;         //  total variable over timeout
 	}
 
 	// set receive pin HIGH briefly to charge up fully - because the while loop above will exit when pin is ~ 2.5V
-    noInterrupts();
+    //noInterrupts();
 	DIRECT_WRITE_HIGH(rReg, rBit);
 	DIRECT_MODE_OUTPUT(rReg, rBit);  // receivePin to OUTPUT - pin is now HIGH AND OUTPUT
 	DIRECT_WRITE_HIGH(rReg, rBit);
 	DIRECT_MODE_INPUT(rReg, rBit);	// receivePin to INPUT (pullup is off)
 	DIRECT_WRITE_LOW(sReg, sBit);	// sendPin LOW
-    interrupts();
+    //interrupts();
 
 #ifdef FIVE_VOLT_TOLERANCE_WORKAROUND
 	DIRECT_MODE_OUTPUT(rReg, rBit);
@@ -194,6 +195,7 @@ int CapacitiveSensor::SenseOneCycle(void)
 #endif
 	//Serial.print("SenseOneCycle(2): ");
 	//Serial.println(total);
+    interrupts();
 
 	if (total >= CS_Timeout_Millis) {
 		return -2;     // total variable over timeout

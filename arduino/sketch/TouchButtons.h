@@ -31,7 +31,7 @@ namespace sonar{
 class TouchButtons : public Module
 {
 public:
-	TouchButtons() : Module("TouchButtons"), vsc_(0)
+	TouchButtons() : Module("TouchButtons")
 	{
 		for(int i=0;i<4;++i){
 			sv1_[i] = 0;
@@ -44,24 +44,19 @@ public:
 		c_[1] = CapacitiveSensor(5,6);
 		c_[2] = CapacitiveSensor(7,8);
 		c_[3] = CapacitiveSensor(9,10);
+		for(int i=0;i<4;++i){
+			c_[i].set_CS_AutocaL_Millis(0xFFFFFFFF);
+		}
 		return 0;
 	}
 
 	int8_t update(uint32_t frames) override
 	{
-		if(frames % 80 == 0){
-			if(vsc_ == 2){
-				for(int i=0;i<4;++i){
-					sv2_[i] = sv1_[i];
-					sv1_[i] = 0;
-				}
-				vsc_ = 0;
-				//Serial.println(sv2_[3]);
-			}
+		if(frames % 60 == 0){
 			for(int i=0;i<4;++i){
-				sv1_[i] += c_[i].capacitiveSensor(40);
+				sv1_[i] = c_[i].capacitiveSensor(40);
 			}
-			vsc_++;
+			//Serial.println(sv1_[0]);
 		}
 		return 0;
 	}
@@ -73,10 +68,10 @@ public:
 			case 0:
 				{
 					for(int i=0;i<4;i++){
-						if(255 < sv2_[i]){
-							sv2_[i] = 255;
+						if(255 < sv1_[i]){
+							sv1_[i] = 255;
 						}
-						uint8_t v = static_cast<uint8_t>(sv2_[i]);
+						uint8_t v = static_cast<uint8_t>(sv1_[i]);
 						Serial.write(v);
 					}
 					Serial.flush();
@@ -97,8 +92,6 @@ public:
 private:
 	CapacitiveSensor c_[4];
 	uint16_t sv1_[4];
-	uint16_t sv2_[4];
-	int8_t vsc_;
 };
 
 }

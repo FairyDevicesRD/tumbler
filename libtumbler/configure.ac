@@ -1,5 +1,5 @@
 AC_PREREQ([2.69])
-AC_INIT([libtumbler],[0.1.0],[contact@fairydevices.jp])
+AC_INIT([libtumbler],[1.0.0],[contact@fairydevices.jp])
 AC_CONFIG_SRCDIR([src/tumbler.cpp])
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -24,7 +24,7 @@ AM_PROG_AR
 #     age.
 #  6. If any interfaces have been removed since the last public release, then set age
 #     to 0.
-SHARED_VERSION_INFO="0:1:0"
+SHARED_VERSION_INFO="1:0:0"
 
 # Save User CFLAGS
 CFLAGS_SAVE=$CFLAGS

@@ -68,8 +68,10 @@ int monitorAsync_(ButtonStateCallback func, std::atomic<bool>* stopflag)
 			break;
 		}
 		// 判定
+		//std::cout << "----" << std::endl;
 		for(int i=0;i<4;++i){
 			unsigned short p = static_cast<unsigned short>(buttonValue[i]);
+			//std::cout << "#" << i << " p = " << p << std::endl;
 			if(60 < p){
 				currState[i] = ButtonState::pushed_;
 			}else{
@@ -105,12 +107,18 @@ Buttons::Buttons(ButtonStateCallback func) :
 		subsystem_(ArduinoSubsystem::getInstance()),
 		callback_(func),
 		status_(false),
-		stopflag_(false)
-{}
+		stopflag_(false),
+		baseline_(0)
+{
+
+}
 
 void Buttons::start()
 {
 	status_ = true;
+	// 内部補正を行う
+
+
 	monitor_ = std::async(std::launch::async, monitorAsync_, callback_, &stopflag_);
 	syslog(LOG_INFO, "Button monitor started");
 }

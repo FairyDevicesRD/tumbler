@@ -66,7 +66,7 @@ void setup()
 	// 38400 bps, 4800 byte/sec, 48 byte/10msec(=100fps)
 	// 19200 bps, 2400 byte/sec  60 byte /25msec(=40fps)
 	Wire.begin();
-	delay(500);
+	delay(100);
 	
 	// モジュールの初期化   
 	//Serial.println("sonar.ai sensor subsystem w/ arduino uno, starting-up");
