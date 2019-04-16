@@ -55,13 +55,13 @@ int main(int argc, char** argv)
     using namespace tumbler;
 	std::vector<short> audio = FileReader("data/test1.raw");
 	std::vector<short> ad;
-	for(int i=0;i<audio.size();++i){
+	for(size_t i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
-	for(int i=0;i<audio.size();++i){
+	for(size_t i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
-	for(int i=0;i<audio.size();++i){
+	for(size_t i=0;i<audio.size();++i){
 		ad.push_back(audio[i]);
 	}
     {

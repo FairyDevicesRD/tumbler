@@ -51,7 +51,7 @@ std::vector<short> FileReader(const std::string& filename)
 	return filedata;
 }
 
-void ButtonStateFunc(std::vector<ButtonState> state)
+void ButtonStateFunc(std::vector<ButtonState> state, ButtonInfo info, void* userdata)
 {
 	std::cout << "callback" << std::endl;
 	int pushed = 0;

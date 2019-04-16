@@ -113,7 +113,10 @@ static int LEDRing_showImpl_(const std::vector<Frame>& frames, int fps)
 		}
 		float t1 = tm.stop();
 		float mod_wait_msec = std_wait_msec - t1;
-		usleep(mod_wait_msec*1000);
+		if(frames.size() != 1){
+			// 登録されているフレームサイズが 1 、すなわちアニメーションではない場合は FPS に基づく制御を無効とする
+			usleep(mod_wait_msec*1000);
+		}
 	}
 	if(readlen == 1 && ack[0] == '1'){
 		return 0; // OK
