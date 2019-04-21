@@ -48,7 +48,7 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 		prevState[i] = ButtonState::none_;
 	}
 	bool first_process = true; // 初回のセンシング処理例外のためのフラグ
-	int baseline = 0; // 4 ボタン平均の移動平均によるベースライン追跡簡易処理とする
+	std::vector<int> baseline = {0,0,0,0}; // ベースラインは 4 ボタン別々とする
 	int localCounterFromLEDRingChange = 0; // LED リング変化後にボタンステートへの影響が出るまでの遅延をカバーする
 
 	while(stopflag->load() == false){
@@ -86,22 +86,27 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 		}
 		if(all_none_state || subsystem.c_status_ledringChange_.load()){ // 全ボタンが none_ ステートもしくは LED リングが変化したとき
 			// ベースライン追跡処理を行う
-			float mean = 0;
-			for(int i=0;i<4;++i){
-				unsigned short p = static_cast<unsigned short>(buttonValue[i]);
-				mean += static_cast<float>(p);
-			}
-			mean = mean / 4.0F;
-
-			float new_baseline_candidate = static_cast<float>(baseline) * 0.5F + mean * 0.5F;
-			if(first_process || subsystem.c_status_ledringChange_.load()){ // 初回例外もしくは LED リングが変化したときは、急変動制約を外す
-				baseline = static_cast<int>(new_baseline_candidate); // 初回はベースラインを更新し
+			if(first_process){
+				// 初回は必ず更新する
+				for(int i=0;i<4;++i){
+					unsigned short p = static_cast<unsigned short>(buttonValue[i]);
+					baseline[i] = static_cast<float>(baseline[i]) * 0.5F + p * 0.5F;
+				}
 				first_process = false;
 			}else{
-				// ベースラインは移動平均による簡易処理だが、1 ステップで、前回のベースラインからしきい値以上の急変動を採用しない
-				if(std::abs(new_baseline_candidate - static_cast<float>(baseline)) < static_cast<float>(baseline) * 0.5){
-					// baseline の変動が 50% 以下である
-					baseline = static_cast<int>(new_baseline_candidate);
+				for(int i=0;i<4;++i){
+					unsigned short p = static_cast<unsigned short>(buttonValue[i]);
+					float new_baseline_candidate = static_cast<float>(baseline[i]) * 0.5F + p * 0.5F;
+					if(subsystem.c_status_ledringChange_.load()){
+						// LED リングが変化したときは急制動制約を外す
+						baseline[i] = static_cast<int>(new_baseline_candidate);
+					}else{
+						// LED リングが無変化のときは急制動制約、1 ステップで前回のベースラインから閾値以上の急変動を採用しない
+						if(std::abs(new_baseline_candidate - static_cast<float>(baseline[i])) < static_cast<float>(baseline[i]) * 0.5){
+							// baseline の変動が 50% 以下である
+							baseline[i] = static_cast<int>(new_baseline_candidate);
+						}
+					}
 				}
 			}
 		}
@@ -109,7 +114,9 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 		if(subsystem.c_status_ledringChange_.load()){
 			// 判定を行わない
 #ifdef SENSOR_VALUE_OUTPUT_DEBUG
-			std::cout << "baseline = " << baseline << " [ LED STATUS CHANGE ]" << std::endl;
+			for(int i=0;i<4;++i){
+				std::cout << "baseline[" << i << "] = " << baseline[i] << " [ LED STATUS CHANGE ]" << std::endl;
+			}
 #endif
 			localCounterFromLEDRingChange++;
 			if(3 < localCounterFromLEDRingChange){ // 3 計測分は無判定区間とする
@@ -119,11 +126,13 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 		}else{
 			// 判定を行う
 #ifdef SENSOR_VALUE_OUTPUT_DEBUG
-			std::cout << "baseline = " << baseline << std::endl;
+			for(int i=0;i<4;++i){
+				std::cout << "baseline[" << i << "] = " << baseline[i] << std::endl;
+			}
 #endif
 			for(int i=0;i<4;++i){
 				unsigned short p = static_cast<unsigned short>(buttonValue[i]);
-				int corrected_p = static_cast<int>(p) - baseline; // ベースラインをサブトラクション（ここで負の値になることもある）
+				int corrected_p = static_cast<int>(p) - baseline[i]; // ベースラインをサブトラクション（ここで負の値になることもある）
 #ifdef SENSOR_VALUE_OUTPUT_DEBUG
 				std::cout << "#" << i << " corrected_p = " << corrected_p << std::endl;
 #endif
@@ -173,8 +182,8 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 			binfo.corrValues_.clear();
 			for(int i=0;i<4;++i){
 				unsigned short p = static_cast<unsigned short>(buttonValue[i]);
-				int corrected_p = static_cast<int>(p) - baseline; // ベースラインをサブトラクション（ここで負の値になることもある）
-				binfo.baselines_.push_back(baseline);
+				int corrected_p = static_cast<int>(p) - baseline[i]; // ベースラインをサブトラクション（ここで負の値になることもある）
+				binfo.baselines_.push_back(baseline[i]);
 				binfo.corrValues_.push_back(corrected_p);
 			}
 			func(currState, binfo, userdata);

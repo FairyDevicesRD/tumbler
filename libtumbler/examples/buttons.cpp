@@ -46,10 +46,10 @@ using namespace tumbler;
 void ButtonStateFunc(std::vector<ButtonState> state, ButtonInfo info, void* userdata)
 {
 	// 通常の短押しの検出例
-	std::cout << "callback called (baseline = " << info.baselines_[0] << ")" << std::endl;
+	std::cout << "callback called" << std::endl;
 	for(int i=0;i<4;++i){
 		if(state[i] == ButtonState::pushed_){
-			std::cout << "PUSHED (" << info.corrValues_[i] << ")" << std::endl;
+			std::cout << "PUSHED (" << info.corrValues_[i] << ", baseline=" << info.baselines_[i] << ")" << std::endl;
 		}else if(state[i] == ButtonState::released_){
 			std::cout << "RELEASED (" << info.corrValues_[i] << ")" << std::endl;
 		}else if(state[i] == ButtonState::none_){
