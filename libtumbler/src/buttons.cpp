@@ -102,7 +102,7 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 						baseline[i] = static_cast<int>(new_baseline_candidate);
 					}else{
 						// LED リングが無変化のときは急制動制約、1 ステップで前回のベースラインから閾値以上の急変動を採用しない
-						if(std::abs(new_baseline_candidate - static_cast<float>(baseline[i])) < static_cast<float>(baseline[i]) * 0.5){
+						if(std::abs(new_baseline_candidate - static_cast<float>(baseline[i])) <= static_cast<float>(baseline[i]) * 0.66F){
 							// baseline の変動が 50% 以下である
 							baseline[i] = static_cast<int>(new_baseline_candidate);
 						}
