@@ -3,7 +3,7 @@
  * \~english
  * @brief 
  * \~japanese
- * @brief タッチボタンの利用例２、より実際的な例。長押しの判定機能がある。
+ * @brief タッチボタンの利用例４、長押しの終了検出機能をさらに追加した。LED の調色アプリケーションの例。
  * \~ 
  * @author Masato Fujino, created on: Apr 16, 2019
  * @copyright Copyright 2019 Fairy Devices Inc. http://www.fairydevices.jp/
@@ -141,10 +141,39 @@ protected:
 	 */
 	void OnPush(int buttonId) override
 	{
-		//
-		// ここに短押しの場合の適切なコードを実装します。
-		//
-		std::cout << "Button Pushed: #" << buttonId << std::endl;
+		if(buttonId == 3){
+			if(step_ == 20) step_ = -20;
+			else step_ = 20;
+			std::cout << "RGB CHANGE STEP = " << step_ << std::endl;
+		}else if(buttonId == 2){
+			b_ += step_;
+			if(255 < b_){
+				b_ = 0;
+			}else if(b_ < 0){
+				b_ = 255;
+			}
+		}else if(buttonId == 1){
+			g_ += step_;
+			if(255 < g_){
+				g_ = 0;
+			}else if(g_ < 0){
+				g_ = 255;
+			}
+		}else if(buttonId == 0){
+			r_ += step_;
+			if(255 < r_){
+				r_ = 0;
+			}else if(r_ < 0){
+				r_ = 255;
+			}
+		}
+		std::cout << "RGB=(" << r_ << "," << g_ << "," << b_ << ")" << std::endl;
+		Frame frame;
+		for(int i=0;i<Frame::k_num_leds_;++i){
+			frame.setLED(i, LED(r_,g_,b_));
+		}
+		LEDRing &ring = LEDRing::getInstance();
+		ring.motion(true, 0, frame);
 	}
 
 	/**
@@ -156,11 +185,21 @@ protected:
 	 */
 	void OnLongPush(int buttonId) override
 	{
-		//
-		// ここに長押しの場合の適切なコードを実装します。
-		//
-		std::cout << "Button Long Pushed: #" << buttonId << std::endl;
+		if(buttonId == 3){
+			LEDRing& ring = LEDRing::getInstance();
+			ring.reset(false);
+			r_ = 0;
+			g_ = 0;
+			b_ = 0;
+			std::cout << "RESET RGB=(" << r_ << "," << g_ << "b" << b_ << ")" << std::endl;
+		}
 	}
+
+private:
+	int step_ = 20;
+	int r_ = 0;
+	int g_ = 0;
+	int b_ = 0;
 };
 
 /**
@@ -199,9 +238,17 @@ int main(int argc, char** argv)
 	MyButtonEvent buttonEvent(std::chrono::milliseconds(2000)); // 2 秒以上を長押しとします
 
 	// タッチボタンを開始します
+	ButtonDetectionConfig config;
+	config.multiTouchDetectionEnabled_ = false;
 	Buttons& buttons = Buttons::getInstance(ButtonStateFunc, static_cast<void*>(&buttonEvent));
 	buttons.start();
-	std::cout << "ボタンにタッチするとコールバック関数が呼ばれます。このプログラムは 30 秒で終了します..." << std::endl;
+	std::cout << "LED の調色サンプルプログラム（ボタンの連打は避けてください）" << std::endl;
+	std::cout << std::endl;
+	std::cout << "○ 短押し: 赤色LED を 10% 変化させます" << std::endl;
+	std::cout << "△ 短押し: 青色LED を 10% 変化させます" << std::endl;
+	std::cout << "□ 短押し: 青色LED を 10% 変化させます" << std::endl;
+	std::cout << "x 短押し: 変化方向の＋／ーを切り替えます" << std::endl;
+	std::cout << "x 長押し: リセットし消灯します" << std::endl;
 	sleep(60); // 60 秒待ちます
 	buttons.stop();
 	return 0;

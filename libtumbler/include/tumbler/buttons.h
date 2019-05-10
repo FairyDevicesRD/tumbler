@@ -58,25 +58,44 @@ public:
 	std::vector<int> corrValues_; //!< ベースライン補正値を減算した各タッチボタンの補正済計測値
 };
 
+/**
+ * @class ButtonDetectionConfig
+ * @brief タッチボタン検出の設定
+ */
+class DLL_PUBLIC ButtonDetectionConfig
+{
+public:
+	bool multiTouchDetectionEnabled_ = true; //!< マルチタッチを有効にする（マルチタッチ無効の場合は、先に押されたボタンのみ有効。完全同時に押された場合は、より強く押された方のみ有効となる）
+	bool manualThreshold_ = false; //!< 補正済計測値からの増分閾値を以下に指定する指定値にする
+	int manualThresholdValues_[4]; //!< 増分閾値の指定
+};
+
 using ButtonStateCallback = void (*)(std::vector<ButtonState>, ButtonInfo, void*);
 
+/**
+ * @class Buttons
+ * @brief ４つのタッチボタンを表すクラス
+ */
 class DLL_PUBLIC Buttons
 {
 public:
 	static Buttons& getInstance(ButtonStateCallback func, void* userdata);
+	static Buttons& getInstance(ButtonStateCallback func, const ButtonDetectionConfig &config, void* userdata);
 
 	void start();
 	void stop();
 
 private:
 	Buttons(ButtonStateCallback, void*);
+	Buttons(ButtonStateCallback, const ButtonDetectionConfig&, void*);
 	Buttons(const Buttons&);
 	Buttons &operator=(const Buttons&);
 	ArduinoSubsystem& subsystem_;
 	ButtonStateCallback callback_;
+	bool status_;
+	ButtonDetectionConfig config_;
 	std::future<int> monitor_;
 	std::atomic<bool> stopflag_;
-	bool status_;
 	void* userdata_;
 };
 

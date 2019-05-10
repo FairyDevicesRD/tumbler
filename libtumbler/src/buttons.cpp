@@ -37,7 +37,7 @@
 
 namespace tumbler{
 
-int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* stopflag)
+int monitorAsync_(ButtonStateCallback func, ButtonDetectionConfig config, void* userdata, std::atomic<bool>* stopflag)
 {
 	int errorno = 0;
 	ButtonInfo binfo;
@@ -50,6 +50,14 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 	bool first_process = true; // 初回のセンシング処理例外のためのフラグ
 	std::vector<int> baseline = {0,0,0,0}; // ベースラインは 4 ボタン別々とする
 	int localCounterFromLEDRingChange = 0; // LED リング変化後にボタンステートへの影響が出るまでの遅延をカバーする
+
+	int incThresholdValue[4] = {30,30,30,30}; // 増分閾値
+	if(config.manualThreshold_){
+		for(int i=0;i<4;++i){
+			incThresholdValue[i] = config.manualThresholdValues_[i];
+		}
+	}
+	bool multiTouchEnabled = config.multiTouchDetectionEnabled_;
 
 	while(stopflag->load() == false){
 		// 通信（グローバルサブシステムロック）
@@ -103,7 +111,7 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 					}else{
 						// LED リングが無変化のときは急制動制約、1 ステップで前回のベースラインから閾値以上の急変動を採用しない
 						if(std::abs(new_baseline_candidate - static_cast<float>(baseline[i])) <= static_cast<float>(baseline[i]) * 0.66F){
-							// baseline の変動が 50% 以下である
+							// baseline の変動が 66% 以下である
 							baseline[i] = static_cast<int>(new_baseline_candidate);
 						}
 					}
@@ -130,16 +138,64 @@ int monitorAsync_(ButtonStateCallback func, void* userdata, std::atomic<bool>* s
 				std::cout << "baseline[" << i << "] = " << baseline[i] << std::endl;
 			}
 #endif
-			for(int i=0;i<4;++i){
-				unsigned short p = static_cast<unsigned short>(buttonValue[i]);
-				int corrected_p = static_cast<int>(p) - baseline[i]; // ベースラインをサブトラクション（ここで負の値になることもある）
+			if(multiTouchEnabled){
+				// マルチタッチ有効（デフォルト）
+				for(int i=0;i<4;++i){
+					unsigned short p = static_cast<unsigned short>(buttonValue[i]);
+					int corrected_p = static_cast<int>(p) - baseline[i]; // ベースラインをサブトラクション（ここで負の値になることもある）
 #ifdef SENSOR_VALUE_OUTPUT_DEBUG
-				std::cout << "#" << i << " corrected_p = " << corrected_p << std::endl;
+					std::cout << "#" << i << " corrected_p = " << corrected_p << std::endl;
 #endif
-				if(30 < corrected_p){
-					currState[i] = ButtonState::pushed_;
+					if(incThresholdValue[i] < corrected_p){
+						currState[i] = ButtonState::pushed_;
+					}else{
+						currState[i] = ButtonState::none_;
+					}
+				}
+			}else{
+				// マルチタッチ無効
+				// 完全同時押し対応のため
+				int maxSensedValue = -1000;
+				int maxSensedButton = 0;
+				// 先押し優先のため
+				int hasPushedButton = false;
+				int pushedButton = 0;
+				int pushedButtonSensedValue = 0;
+				for(int i=0;i<4;++i){
+					unsigned short p = static_cast<unsigned short>(buttonValue[i]);
+					int corrected_p = static_cast<int>(p) - baseline[i]; // ベースラインをサブトラクション（ここで負の値になることもある）
+#ifdef SENSOR_VALUE_OUTPUT_DEBUG
+					std::cout << "#" << i << " corrected_p = " << corrected_p << std::endl;
+#endif
+					// 最大の測定値を求める
+					if(maxSensedValue < corrected_p){
+						maxSensedValue = corrected_p;
+						maxSensedButton = i;
+					}
+					if(currState[i] == ButtonState::pushed_){
+						hasPushedButton = true;
+						pushedButton = i;
+						pushedButtonSensedValue = corrected_p;
+					}
+				}
+				for(int i=0;i<4;++i){
+					currState[i] = ButtonState::none_; // クリア
+				}
+
+				if(hasPushedButton){
+					// 1 つ押されている状態のとき
+					if(incThresholdValue[pushedButton] < pushedButtonSensedValue){
+						currState[pushedButton] = ButtonState::pushed_;
+					}else{
+						currState[pushedButton] = ButtonState::none_;
+					}
 				}else{
-					currState[i] = ButtonState::none_;
+					// 1 つも押されていない状態なので、最大値を取ったボタンが増分閾値を超えていたら pushed_ 判定として良い
+					if(incThresholdValue[maxSensedButton] < maxSensedValue){
+						currState[maxSensedButton] = ButtonState::pushed_;
+					}else{
+						currState[maxSensedButton] = ButtonState::none_;
+					}
 				}
 			}
 		}
@@ -206,6 +262,13 @@ Buttons& Buttons::getInstance(ButtonStateCallback func, void* userdata)
 	return instance;
 }
 
+Buttons& Buttons::getInstance(ButtonStateCallback func, const ButtonDetectionConfig &config, void* userdata)
+{
+	static Buttons instance(func, config, userdata);
+	return instance;
+}
+
+
 Buttons::Buttons(ButtonStateCallback func, void* userdata) :
 		subsystem_(ArduinoSubsystem::getInstance()),
 		callback_(func),
@@ -214,10 +277,19 @@ Buttons::Buttons(ButtonStateCallback func, void* userdata) :
 		userdata_(userdata)
 {}
 
+Buttons::Buttons(ButtonStateCallback func, const ButtonDetectionConfig &config, void* userdata) :
+		subsystem_(ArduinoSubsystem::getInstance()),
+		callback_(func),
+		status_(false),
+		config_(config),
+		stopflag_(false),
+		userdata_(userdata)
+{}
+
 void Buttons::start()
 {
 	status_ = true;
-	monitor_ = std::async(std::launch::async, monitorAsync_, callback_, userdata_, &stopflag_);
+	monitor_ = std::async(std::launch::async, monitorAsync_, callback_, config_, userdata_, &stopflag_);
 	syslog(LOG_INFO, "Button monitor started");
 }
 
