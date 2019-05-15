@@ -27,3 +27,9 @@ ledring_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
 bin_PROGRAMS+=ledring2
 ledring2_SOURCES=ledring2.cpp
 ledring2_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+
+if ENVSENSOR
+bin_PROGRAMS+=envsensor
+envsensor_SOURCES=envsensor.cpp
+envsensor_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+endif

@@ -9,17 +9,14 @@
 
 #include <Adafruit_NeoPixel.h>
 #include <Wire.h>
-#include <SSCI_BME280.h>
 
 #include "CapacitiveSensor.h"
 #include "Module.h"
 #include "Constants.h"
-#include "BME280.h"
 #include "LEDRing.h"
 #include "TouchButtons.h"
 
 // 制御対象
-//sonar::BME280 bme280_ = sonar::BME280();
 sonar::LEDRing ring_ = sonar::LEDRing(false);
 sonar::TouchButtons buttons_ = sonar::TouchButtons();
 
@@ -71,7 +68,6 @@ void setup()
 	// モジュールの初期化   
 	//Serial.println("sonar.ai sensor subsystem w/ arduino uno, starting-up");
 	//Serial.println("-----------------------------------------------------");
-	//bme280_.init();
 	ring_.init();
 	buttons_.init();
 
@@ -165,7 +161,6 @@ void loop()
 	serialRecv();	
 	// シリアル通信経由の命令受信の確認
 	if(serial_eob_){
-		// bme280_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
 		ring_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
 		buttons_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
 		serial_eob_ = false;
@@ -173,7 +168,6 @@ void loop()
 		serial_com_body_length_ = 0;
 	}
 	// モジュールの更新と実行
-	// bme280_.update(frames_);
 	ring_.update(frames_);
 	buttons_.update(frames_);
 	// シリアル通信のコンシステンシー維持のためのタイムアウト	

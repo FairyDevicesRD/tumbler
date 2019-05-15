@@ -62,12 +62,25 @@ else
    CXXFLAGS="$CXXFLAGS_SAVE -O3 -DNDEBUG -Wall -fvisibility=hidden -fvisibility-inlines-hidden"
 fi
 
+## Environmental sensor support
+AC_ARG_ENABLE(envsensor,
+AS_HELP_STRING([--enable-envsensor],
+               [Enable environmental sensor (bme280), default: no]),
+	       [case "${enableval}" in
+	       	     yes) envsensor=true ;;
+		     no)  envsensor=false ;;
+		     *)   AC_MSG_ERROR([invalid value ${enableval} for --enable-envsensor]) ;;
+		esac],
+		[envsensor=false])
+AM_CONDITIONAL(ENVSENSOR, test x"$envsensor" = x"true")
+
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(SHLIB_VERSION_ARG)
 AC_SUBST(SHARED_VERSION_INFO)
 AC_SUBST(OS_SPECIFIC_INCLUDES)
 AC_SUBST(OS_SPECIFIC_LINKS)
+AC_SUBST(ENVSENSOR)
 
 # Check for C++11
 AX_CXX_COMPILE_STDCXX_11([ext],[mandatory])
@@ -101,6 +114,16 @@ AC_MSG_RESULT([
     CFLAGS: ....................... ${CFLAGS}
     CXXFLAGS: ..................... ${CXXFLAGS} 
 ])
+
+if test x"$envsensor" = x"true";then
+AC_MSG_RESULT([
+    Environmetanl sensor support .. yes
+])
+else
+AC_MSG_RESULT([
+    Environmetanl sensor support .. no
+])
+fi
 
 if test x"$debug" = x"true";then
 AC_MSG_RESULT([
