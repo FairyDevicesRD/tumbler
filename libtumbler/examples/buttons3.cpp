@@ -60,17 +60,13 @@ void ButtonStateFunc(std::vector<ButtonState> state, ButtonInfo info, void* user
 
 int main(int argc, char** argv)
 {
-	// LED リングを消灯しておきます（本サンプルプログラムには不要です）
-	LEDRing& ring = LEDRing::getInstance();
-	ring.reset(false);
-
 	// タッチボタンを開始します
 	ButtonDetectionConfig config;
 	config.multiTouchDetectionEnabled_ = false; // マルチタッチ無効
 	Buttons& buttons = Buttons::getInstance(ButtonStateFunc, config, nullptr);
 	buttons.start();
-	std::cout << "ボタンにタッチするとコールバック関数が呼ばれます。このプログラムは 30 秒で終了します..." << std::endl;
-	sleep(30); // 30 秒待ちます
+	std::cout << "ボタンにタッチするとコールバック関数が呼ばれます。このプログラムは 60 秒で終了します..." << std::endl;
+	sleep(60); // 60 秒待ちます
 	buttons.stop();
 	return 0;
 }

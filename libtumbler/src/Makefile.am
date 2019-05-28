@@ -12,3 +12,14 @@ libtumbler_la_SOURCES = tumbler.cpp ledring.cpp speaker.cpp buttons.cpp
 if ENVSENSOR
 libtumbler_la_SOURCES+= envsensor.cpp thirdparty/raspberry-pi-bme280/bme280.cpp
 endif
+
+if LIGHTSENSOR
+libtumbler_la_SOURCES+= lightsensor.cpp
+endif
+
+if IRIO
+AM_CXXFLAGS += -I/@PIGPIO_LIBRARY@
+libtumbler_la_LDFLAGS += -L/@PIGPIO_LIBRARY@
+libtumbler_la_LIBADD += -lpigpio
+libtumbler_la_SOURCES+= irio.cpp
+endif

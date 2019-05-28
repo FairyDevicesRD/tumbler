@@ -52,7 +52,7 @@ public:
 
 	int8_t update(uint32_t frames) override
 	{
-		if(frames % 60 == 0){
+		if(frames % 35 == 0){
 			for(int i=0;i<4;++i){
 				sv1_[i] = c_[i].capacitiveSensor(40);
 			}

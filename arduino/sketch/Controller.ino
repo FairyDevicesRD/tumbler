@@ -15,10 +15,14 @@
 #include "Constants.h"
 #include "LEDRing.h"
 #include "TouchButtons.h"
+#include "LightSensor.h"
+#include "IRLED.h"
 
 // 制御対象
 sonar::LEDRing ring_ = sonar::LEDRing(false);
 sonar::TouchButtons buttons_ = sonar::TouchButtons();
+sonar::LightSensor lightsensor_ = sonar::LightSensor();
+sonar::IRLED irled_ = sonar::IRLED();
 
 // # 起動時に確保するメモリ領域
 
@@ -70,6 +74,8 @@ void setup()
 	//Serial.println("-----------------------------------------------------");
 	ring_.init();
 	buttons_.init();
+	lightsensor_.init();
+	irled_.init();
 
 #ifdef RUNTIME_MEMORY_CHECK
 	printFreeRAM();
@@ -163,6 +169,9 @@ void loop()
 	if(serial_eob_){
 		ring_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
 		buttons_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
+		lightsensor_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
+		irled_.recv(serial_com_type_, serial_com_subtype_, serial_com_body_, serial_com_body_length_);
+
 		serial_eob_ = false;
 		serial_cur_ = 0;
 		serial_com_body_length_ = 0;
@@ -170,14 +179,16 @@ void loop()
 	// モジュールの更新と実行
 	ring_.update(frames_);
 	buttons_.update(frames_);
+	lightsensor_.update(frames_);
+	irled_.update(frames_);
+
 	// シリアル通信のコンシステンシー維持のためのタイムアウト	
-	/*
-	if(last_serial_recv_ < start_time_ && 100 < start_time_ - last_serial_recv_){
-		serial_eob_ = false;
-		serial_cur_ = 0;
-		serial_com_body_length_ = 0;
-	}
-	*/
+	//if(last_serial_recv_ < start_time_ && 100 < start_time_ - last_serial_recv_){
+	//	serial_eob_ = false;
+	//	serial_cur_ = 0;
+	//	serial_com_body_length_ = 0;
+	//}
+
 	end_time_ = millis();
 	++frames_;
 	// タイムキープしない

@@ -74,6 +74,46 @@ AS_HELP_STRING([--enable-envsensor],
 		[envsensor=false])
 AM_CONDITIONAL(ENVSENSOR, test x"$envsensor" = x"true")
 
+## Light sensor support
+AC_ARG_ENABLE(lightsensor,
+AS_HELP_STRING([--enable-lightsensor],
+               [Enable light sensor (ltr329), default: no]),
+	       [case "${enableval}" in
+	       	     yes) lightsensor=true ;;
+		     no)  lightsensor=false ;;
+		     *)   AC_MSG_ERROR([invalid value ${enableval} for --enable-lightsensor]) ;;
+		esac],
+		[lightsensor=false])
+AM_CONDITIONAL(LIGHTSENSOR, test x"$lightsensor" = x"true")
+
+## IR I/O support
+AC_ARG_ENABLE(irio,
+AS_HELP_STRING([--enable-irio],
+               [Enable IR I/O, default: no]),
+	       [case "${enableval}" in
+	       	     yes) irio=true ;;
+		     no)  irio=false ;;
+		     *)   AC_MSG_ERROR([invalid value ${enableval} for --enable-irio]) ;;
+		esac],
+		[irio=false])
+AM_CONDITIONAL(IRIO, test x"$irio" = x"true")
+
+## IR I/O dependency (pigpio)
+if test x"$irio" = x"true"; then
+AC_MSG_CHECKING([pigpio library])
+AC_ARG_WITH([pigpio],
+	[pigpio library],
+	[with_pigpio=$withval],
+	[with_pigpio=no])
+AC_MSG_RESULT([$with_pigpio])
+if test x"$with_pigpio" = x"no"; then
+   AC_MSG_ERROR(["You must specify where is the pigpio library with using --with-pigpio option"])
+else
+   PIGPIO_LIBRARY=$with_pigpio
+   AC_SUBST(PIGPIO_LIBRARY)
+fi
+fi
+
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
 AC_SUBST(SHLIB_VERSION_ARG)
@@ -115,16 +155,6 @@ AC_MSG_RESULT([
     CXXFLAGS: ..................... ${CXXFLAGS} 
 ])
 
-if test x"$envsensor" = x"true";then
-AC_MSG_RESULT([
-    Environmetanl sensor support .. yes
-])
-else
-AC_MSG_RESULT([
-    Environmetanl sensor support .. no
-])
-fi
-
 if test x"$debug" = x"true";then
 AC_MSG_RESULT([
   Debug build ..................... yes
@@ -134,6 +164,36 @@ AC_MSG_RESULT([
     Debug build ................... no
 ])
 fi
+
+AC_MSG_RESULT([  Support for optional sensors :])
+if test x"$envsensor" = x"true";then
+AC_MSG_RESULT([
+    Environmetanl sensor support .. yes])
+else
+AC_MSG_RESULT([
+    Environmetanl sensor support .. no])
+fi
+
+if test x"$lightsensor" = x"true";then
+AC_MSG_RESULT([
+    Light sensor support .......... yes
+])
+else
+AC_MSG_RESULT([
+    Light sensor support .......... no])
+fi
+
+if test x"$irio" = x"true";then
+AC_MSG_RESULT([
+    IR I/O support ................ yes
+    pigpio library  ............... ${PIGPIO_LIBRARY}
+])
+else
+AC_MSG_RESULT([
+    IR I/O support ................ no
+])
+fi
+
 
 AC_MSG_RESULT([  Installation directories :
 

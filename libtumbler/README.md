@@ -16,6 +16,8 @@ libtumbler は、Tumbler の各サブシステムを制御するためのライ�
 #### オプションで有効化する機能
 
 - 環境センサー（BME280）からの温度、湿度、気圧データの取得（環境設定上の留意点がありますので、下記を御覧ください）
+- 光センサー（LTR-329ALS）からの周辺照度データの取得（環境設定上の留意点がありますので、下記を御覧ください）
+- 赤外線 I/O 機能（正面近接センサー、外部赤外線信号受信）
 
 ## 構築
 
@@ -25,6 +27,12 @@ libtumbler は、Tumbler の各サブシステムを制御するためのライ�
 
 - Wiring Pi（wiringpi）
 - ALSA library（libasound2-dev）
+
+#### オプション
+
+##### 赤外線 I/O を利用する場合に必要
+
+- [pigpio library](http://abyz.me.uk/rpi/pigpio/)
 
 ### ビルド
 
@@ -46,16 +54,35 @@ $ make install
 |---|---|---|---|
 |--enable-debug|-|オプションを指定することで、デバッグビルドが有効になります|無効|
 |--enable-envsensor|-|オプションを指定することで、環境センサーサポートが有効化されます|無効|
+|--enable-lightsensor|-|オプションを指定することで、光センサーサポートが有効化されます|無効|
+|--enable-irio|-|オプションを指定することで、赤外線 I/O サポートが有効化されます|無効|
+|--with-pigpio|pigpio library への絶対パス|pigpio ライブラリをビルドしたディレクトリを指定します|なし|
 
-#### 環境センサーサポートを有効化する場合の環境設定上の留意点
+#### 環境センサー及び光センサーサポートを有効化する場合の環境設定上の留意点
 
-環境センサーはデフォルトでは無効化されています（OS での I2C サポートが無効化されています）。環境センサーを有効にする場合、Tumbler の I2C サポートを有効にしておく必要があります。このために、`sudo raspi-config` コマンドを用いて、`5 Interfacing Options` を選択し、`P5 I2C` を選択し、I2C インターフェースを有効化してください。
+環境センサー及び光センサーはそれぞれデフォルトでは無効化されています（OS での I2C サポートが無効化されています）。環境センサーもしくは光センサーを有効にする場合、Tumbler の I2C サポートを有効にしておく必要があります。このために、`sudo raspi-config` コマンドを用いて、`5 Interfacing Options` を選択し、`P5 I2C` を選択し、I2C インターフェースを有効化してください。
 
 ## libtumbler API
 
 ### API の概要
 
 各サブシステムは、ライブラリ上はシングルトン・インスタンスとして取得することができます。シングルトン・インスタンスに対するメンバー関数呼び出しにより、各サブシステムをコントロールします。
+
+### API の利用例の一覧
+
+|サンプルプログラム|内容|
+|---|---|
+| [examples/ledring.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/ledring.cpp) |LED リングの色、位置、組込アニメーション等を制御する簡単な利用例|
+|[examples/ledring2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/ledring2.cpp) |LED リングの外部制御アニメーションに関する利用例|
+|[examples/buttons.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons.cpp)|タッチボタンの利用例|
+|[examples/buttons2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons2.cpp)|タッチボタンの利用例に長押しの判定機能を追加した例|
+|[examples/buttons3.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|マルチタッチを禁止したタッチボタンの利用例|
+|[examples/buttons4.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|短押し、長押しを交えたタッチボタンによるアプリケーションの例|
+|[examples/envsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/envsensor.cpp)|環境センサーの利用例|
+|[examples/lightsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|光センサーの利用例|
+|[examples/irproximitysensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irproximitysensor.cpp)|赤外線 I/O による正面近接センサーの利用例|
+|[examples/irsignalreceiver.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irsignalreceiver.cpp)|赤外線 I/O による外部赤外線信号受信の利用例|
+|[examples/irall.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irall.cpp)|赤外線 I/O による正面近接センサーと、外部赤外線信号受信の同時利用例|
 
 ### LED リング制御
 
@@ -124,12 +151,11 @@ int LEDRing::motion(bool async, uint8_t animationPattern, const Frame& frame);
 
 アニメーションパターンは内部に組み込まれているため、この関数が呼ばれた後は、libtumbler の制御を離れても、同じアニメーションパターンでの点灯が継続されます。
 
-##### addFrame() / setFrames() / clearFrames()
+##### addFrame() / setFrames() 
 
 ``````````.cpp
 void LEDRing::addFrame(const Frame& frame);
 void LEDRing::setFrames(const std::vector<Frame>& frames);
-void LEDRing::clearFrames();
 ``````````
 
 外部制御点灯では、追加した複数フレームを、指定した FPS で順に点灯させるという処理を行います。この関数では、LEDRing クラスに対して、フレームを追加または複数フレームをまとめてセットし、準備します。
@@ -158,7 +184,7 @@ void LEDRing::show(bool async);
 
 addFrame() / setFrames(), setFPS() が呼ばれた後に、実際に外部制御点灯を実行します。第一引数では、外部制御点灯命令の完了を待たない（非同期的に実行する）かどうかを指定します。この関数は、登録されたフレームをすべて表示した後に終了します。すなわち、同期的に呼ばれた `show()` 関数は、登録されたすべてのフレームを表示し終わるまでブロックされます。再生終了後、LED リングは、登録されたフレーム群の最後のフレームが固定表示され続けます。この固定表示状態は、LED リング内部で処理されているため、libtumbler のプロセスの存在に関わらず、常に表示され続けることに留意してください。
 
-典型的な利用事例として、発話開始イベントの発生時に、登録されたアニメーションフレームを非同期で再生開始し、発話終了イベントの発生時に、LED リングをクリアする（もしくは何らかのアニメーションパターンを内部制御点灯で非同期で再生開始する）等があります。この利用例については、`examples/ledring2.cpp` を参考にすることができます。
+典型的な利用事例として、発話開始イベントの発生時に、登録されたアニメーションフレームを非同期で再生開始し、発話終了イベントの発生時に、LED リングをクリアする（もしくは何らかのアニメーションパターンを内部制御点灯で非同期で再生開始する）等があります。この利用例については、[examples/ledring2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/ledring2.cpp) を参考にすることができます。
 
 ### タッチボタン制御
 
@@ -206,7 +232,7 @@ enum class DLL_PUBLIC ButtonState
 
 `ButtonState` 型は、タッチボタンの検出状態を表す列挙型です。それぞれの値の意味は上記の通りとなりますが、留意点として、`ButtonState::released_` ステートは、`ButtonState::pushed_` ステートからの変化として、指が離されたときに 1 回のみ出現することに留意してください。すなわちステートは、`... -> none_ -> none_ -> pushed_ -> pushed -> ... -> pushed_ -> released_ -> none_ -> none -> ...` のように変化します。
 
-タッチされたことを示す状態は `ButtonState::pushed_` ステートのみです。例えば長押し状態等の判定は、`ButtonState::pushed_` が一定時間連続して発生することによって判定可能であり、長押し状態の判定については、`examples/buttons2.cpp` を参考にすることができます。
+タッチされたことを示す状態は `ButtonState::pushed_` ステートのみです。例えば長押し状態等の判定は、`ButtonState::pushed_` が一定時間連続して発生することによって判定可能であり、長押し状態の判定については、[examples/buttons2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons2.cpp)を参考にすることができます。
 
 #### ButtonInfo クラス
 
@@ -261,7 +287,7 @@ void (*)(std::vector<ButtonState>, ButtonInfo, void*);
 
 EnvSensor クラスは、Tumbler に内蔵された環境センサーを表すクラスです。シングルトン・インスタンスとして、複数のスレッドから利用することができます。このクラスを用いることで、気温、湿度、気圧を取得することができます。
 
-サンプルプログラムは `/examples` 以下にあります。
+サンプルプログラムは [examples/envsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/envsensor.cpp) を参照してください。
 
 ##### インスタンスの取得
 
@@ -304,6 +330,142 @@ float EnvSensor::calibrateTemperature(float temp)
 内蔵された温度センサーは、Tumbler 本体から発生する熱の影響を受け、測定値が上振れする場合があります。温度センサーの計測値が上振れした場合、湿度（相対湿度）センサーの計測値が下振れすることになります。熱は特に CPU から発生し、CPU が熱飽和している状況が継続した場合、継続時間に応じて、最大で５度程度、高い値が計測される傾向があります。デフォルトでは、CPU がアイドル状態の場合に外気温となるよう調整されていますが、ユーザーアプリケーションに応じた CPU 使用率の平均状況が分かっている場合には、第一引数の `temp` を用いて、キャリブレーション値（一般的には正の値）を指定することが有効です。`temp` に指定された固定値は、温度センサーの実測値から減算され、温度センサー計測値として `temperature()` 関数の戻り値として返されます。これは、湿度センサーの相対湿度計算にも利用されます。
 
 温度センサーのキャリブレーションは、別途温度計を用意して行うことができます。ユーザーアプリケーションが起動している状態で５分程度の適当な時間をおき、Tumbler 本体の熱状況を安定させます。このときの `temperature()` 関数の出力値と、別途用意した温度計の計測値との差分が `temp` に指定すべきキャリブレーション値となります。
+
+### 光センサー制御
+
+#### 光センサーについて
+
+光センサーは標準装備されていますが、 libtumbler ではオプション対応であり、デフォルトでは無効です。`--enable-lightsensor` オプションをつけて configure した場合のみ有効化されます。また、光センサー自体も Tumbler の OS の初期設定で無効化されています。上記記載の通り、`raspi-config` コマンドを用いることで、OS の I2C サポートを有効にする必要があります。OS の I2C サポートが無効の場合、サンプルプログラムを実行した場合等に、I2C 経由の通信を行うことができず、`Unable to open I2C device: No such file or directory` 等の実行時エラーが発生することに留意してください。
+
+光センサーは LTR-329ALS を搭載しています。感度帯域等については、センサーのデータシートを御覧ください。
+
+#### LightSensor クラス
+
+LightSensor クラスは、Tumbler に内蔵された光センサーを表すクラスです。シングルトン・インスタンスとして、複数のスレッドから利用することができます。このクラスを用いることで、照度[lux]を取得することができます。
+
+サンプルプログラムは [examples/lightsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/lightsensor.cpp) を参照してください。
+
+##### インスタンスの取得
+
+``````````.cpp
+LightSensor& sensor = LightSensor::getInstance();
+``````````
+
+以上のように LightSensor クラスのインスタンスを取得することができます。
+
+##### light()
+
+``````````.cpp
+unsigned int LightSensor::light()
+``````````
+
+唯一のメンバー関数であり、照度[lux]を返します。照度センサーは、Tumbler 上部パネルの正面側にあるマイク穴の下に設置されています。このため、上部パネルに手をかざすようにすると、相対的に小さい照度測定結果を得ることができます。
+
+### 赤外線 I/O 制御
+
+#### 赤外線 I/O について
+
+赤外線 I/O は、以下の 2 つの機能として利用することができます。この 2 つの機能は、同時に利用することも可能です。同時に利用するサンプルプログラムは [examples/irall.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irall.cpp) を参照してください。
+
+##### 正面近接センサー機能
+
+Tumbler から放射される赤外線の反射を、Tumbler 正面側に設置された赤外線受光部で検出することで、Tumbler 正面に物体が存在していることを検出します。センサー感度を設定することができ、最大感度の場合で約 1 m、最小感度の場合で約 30 cm が検出範囲となります。この機能は、Tumbler の正面に人が接近したことを検知するために利用することができます。
+
+サンプルプログラムは [examples/irproximitysensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irproximitysensor.cpp) を参照してください。
+
+##### 外部赤外線信号受信機能
+
+Tumbler 正面側に設置された赤外線受光部で、一般の赤外線リモコン等の赤外線信号を受信することができる機能です。一般の赤外線リモコン等で、Tumbler を遠隔操作することが可能となります。
+
+サンプルプログラムは [examples/irsignalreceiver.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irsignalreceiver.cpp) を参照してください。
+
+#### IRProximitySensor クラス
+
+IRProximitySensor クラスは、赤外線 I/O を正面近接センサーとして利用するためのクラスです。シングルトン・インスタンスとして、複数のスレッドから利用することができます。
+
+##### インスタンスの取得
+
+``````````.cpp
+IRProximitySensor& sensor = IRProximitySensor::getInstance(IRProximityDetectionCallback func, void* userdata);
+``````````
+
+第一引数は、正面近接センサーが物体を検知した際に呼ばれるコールバック関数を指定します。第二引数では、コールバック関数に渡されるユーザー定義の任意データを指定することができます。
+
+##### IRProximitySensor::Sensitivity 列挙型
+
+``````````.cpp
+	enum class Sensitivity
+	{
+		high_,   //!< 高感度（概ね 1 m 以上程度で反応）
+		medium_, //!< 中感度（概ね 60cm 程度で反応）
+		low_,    //!< 低感度（概ね 30cm 程度で反応）
+	};
+``````````
+
+正面近接センサーの感度を指定します。赤外線信号の反射で検出するという原理上、検知距離は、物体の赤外線の反射しやすさや、反射面の大きさに依存して若干変動することに留意してください。
+
+##### start()
+
+``````````.cpp
+int IRProximitySensor::start()
+int IRProximitySensor::start(IRProximitySensor::Sensitivity p)
+``````````
+
+正面近接センサーを開始します。デフォルトでは最大感度で開始されます。感度を弱めたい場合は、第一引数で感度指定可能なオーバーロード関数を利用することができます。感度は、高・中・低の三段階です。この関数が呼ばれると、Tumbler 上部の LED リングから、近接検知用赤外線信号の発振が開始されます。赤外線を肉眼で見ることはできませんが、スマートフォンのカメラ等をかざすことで、カメラ画面を通して薄くピンク色に光っている様子を観察することができます。
+
+##### stop()
+
+``````````.cpp
+int IRProximitySensor::stop()
+``````````
+
+正面近接センサーを終了します。この関数を呼ぶことで、近接検知用赤外線信号の発振も停止します。
+
+#### IRProximityDetectionCallback コールバック関数
+
+``````````.cpp
+void (*)(uint32_t tick, void* userdata);
+``````````
+
+第一引数には、近接検知されたマイクロ秒が返されます。この値は、約 1.2 時間で周回しますが、tick 値の差分は常に期待される値を返すため、周回することについて利用側で留意する必要はありません。第二引数には、ユーザー定義の任意のデータが渡されます。
+
+#### IRSignalReceiver クラス
+
+IRSignalReceiver クラスは、赤外線 I/O を外部からの赤外線信号の受信機として利用するためのクラスです。シングルトン・インスタンスとして、複数のスレッドから利用することができます。
+
+##### インスタンスの取得
+
+``````````.cpp
+IRSignalReceiver& receiver = IRSignalReceiver::getInstance(IRSignalReceiptCallback func, void* userdata);
+``````````
+
+第一引数では、外部からの赤外線信号を受信した際に呼ばれるコールバック関数を指定します。第二引数では、コールバック関数に渡されるユーザー定義の任意データを指定することができます。
+
+##### start()
+
+``````````.cpp
+int IRSignalReceiver::start()
+``````````
+
+外部からの赤外線信号受信を開始します。赤外線受光部は Tumbler 正面に搭載されていますので、赤外線リモコンは、概ね正面方向から操作する必要があります。
+
+##### stop()
+
+``````````.cpp
+int IRSignalReceiver::stop()
+``````````
+
+外部からの赤外線信号受信を終了します。
+
+#### IRSignalReceiptCallback コールバック関数
+
+``````````.cpp
+void (*)(uint32_t signalHash, uint32_t tick, void* userdata);
+``````````
+
+第一引数には、受信した赤外線信号に基づき計算されたハッシュ値が返されます。このハッシュ値は、ある信号に対して一意に定まる値であり、コールバック関数内でユーザープログラムが赤外線信号を識別するために利用することができます。第二引数には、近接検知されたマイクロ秒が返されます。この値は、約 1.2 時間で周回しますが、tick 値の差分は常に期待される値を返すため、周回することについて利用側で留意する必要はありません。第三引数には、ユーザー定義の任意のデータが渡されます。
+
+赤外線リモコンは、普通にボタンを押すと、同一の信号が複数回送信されるものがあります。その場合、このコールバック関数も同一ハッシュ値で複数回呼ばれます。このようなときに、長押しと判定しても良いですが、１度しか対応する処理を実行したくない場合には、同一ハッシュ値だった場合に tick 値を確認し、一定時間以下だった場合は、単一命令とみなすという実装をユーザープログラム側で加えることができます。
 
 ## libtumbler ライセンス情報
 

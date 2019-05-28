@@ -3,7 +3,7 @@
  * \~english
  * @brief Get measured value from environmental sensor which includes temperature, humidity, pressure.
  * \~japanese
- * @brief 環境センサーからの計測値の取得
+ * @brief 環境センサー（BME280）からの計測値（気温、相対湿度、気圧）の取得
  * \~ 
  * @author Masato Fujino, created on: May 14, 2019
  * @copyright Copyright 2019 Fairy Devices Inc. http://www.fairydevices.jp/
@@ -33,7 +33,7 @@ namespace tumbler{
 
 /**
  * @class EnvSensor
- * @brief 環境センサーを表すクラス、シングルトンインスタンスとして利用します。
+ * @brief 環境センサー（BME280）を表すクラス、シングルトン・インスタンスとして利用します。
  */
 class DLL_PUBLIC EnvSensor
 {

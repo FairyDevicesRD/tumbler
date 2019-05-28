@@ -1,11 +1,11 @@
 /*
- * @file envsensor.cpp
+ * @file lightsensor.cpp
  * \~english
  * @brief 
  * \~japanese
- * @brief 環境センサー（BME280）の利用例、気温、湿度、気圧を取得する。
+ * @brief 光センサーの利用例、明るさ[lux]を取得する。
  * \~ 
- * @author Masato Fujino, created on: May 14, 2019
+ * @author Masato Fujino, created on: May 16, 2019
  * @copyright Copyright 2019 Fairy Devices Inc. http://www.fairydevices.jp/
  * @copyright Apache License, Version 2.0
  *
@@ -24,18 +24,17 @@
  * limitations under the License.
  */
 
-
 #include "tumbler/tumbler.h"
-#include "tumbler/envsensor.h"
+#include "tumbler/lightsensor.h"
 #include <iostream>
 
 using namespace tumbler;
 
 int main(int argc, char** argv)
 {
-	EnvSensor& sensor = EnvSensor::getInstance();
-	std::cout << "Temperature: " << sensor.temperature() << " C" << std::endl;
-	std::cout << "Humidity: " << sensor.humidity() << " %" << std::endl;
-	std::cout << "Pressure: " << sensor.pressure() << " hPa" << std::endl;
+	LightSensor& sensor = LightSensor::getInstance();
+	std::cout << "Light: " << sensor.light() << " lux" << std::endl;
 	return 0;
 }
+
+

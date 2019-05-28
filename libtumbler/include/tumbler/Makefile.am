@@ -4,3 +4,11 @@ if ENVSENSOR
 tumblerinclude_HEADERS+= envsensor.h
 endif
 
+if LIGHTSENSOR
+tumblerinclude_HEADERS+= lightsensor.h
+endif
+
+if IRIO
+tumblerinclude_HEADERS+= irio.h
+endif
+

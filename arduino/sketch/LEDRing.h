@@ -106,7 +106,7 @@ namespace sonar{
 					}
 					ring_.show();
 					// アニメーションは、内部カウントアップされるフレーム数によって内部的に継続される
-					if(frames % 25 == 0){
+					if(frames % 17 == 0){
 						if(motion_ == 1){
 							backgroundFrameBuffer_.incr(); // 固定パターンインクリメントによる単純回転
 						}else if(motion_ == 2){

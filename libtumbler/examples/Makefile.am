@@ -33,3 +33,24 @@ bin_PROGRAMS+=envsensor
 envsensor_SOURCES=envsensor.cpp
 envsensor_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
 endif
+
+if LIGHTSENSOR
+bin_PROGRAMS+=lightsensor
+lightsensor_SOURCES=lightsensor.cpp
+lightsensor_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+endif
+
+if IRIO
+AM_LDFLAGS+=-L@PIGPIO_LIBRARY@ -lpigpio
+bin_PROGRAMS+=irproximitysensor
+irproximitysensor_SOURCES=irproximitysensor.cpp
+irproximitysensor_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+
+bin_PROGRAMS+=irsignalreceiver
+irsignalreceiver_SOURCES=irsignalreceiver.cpp
+irsignalreceiver_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+
+bin_PROGRAMS+=irall
+irall_SOURCES=irall.cpp
+irall_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+endif
