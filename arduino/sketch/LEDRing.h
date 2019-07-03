@@ -168,7 +168,7 @@ namespace sonar{
 						backgroundFrameBuffer_ = recv_fb;
 					}
 					break;
-				case 8:
+				case 8: // v1.0 と同じ
 					{			
 						// 外部制御モード（連続アニメーション用）
 						mode_ = 8;

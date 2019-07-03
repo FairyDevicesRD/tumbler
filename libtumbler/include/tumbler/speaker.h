@@ -38,8 +38,7 @@ namespace tumbler{
 /**
  * @class Speaker
  * @brief Speaker を保持するシングルトンクラス
- * @todo 全面書き換え
- * @attention 全面書き換えされます
+ * @todo 書き換えが必要
  */
 class DLL_PUBLIC Speaker
 {

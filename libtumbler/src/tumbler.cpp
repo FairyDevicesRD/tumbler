@@ -11,7 +11,10 @@
 #include <stdlib.h>
 #include <syslog.h>
 #include <sstream>
+#include <mutex>
+#include <thread>
 #include <wiringSerial.h>
+#include <iostream>
 
 namespace tumbler{
 
@@ -70,6 +73,36 @@ int ArduinoSubsystem::dataAvail()
 {
 	return serialDataAvail(serial_);
 }
+
+int ArduinoSubsystem::sketchVersion()
+{
+	std::lock_guard<std::mutex> lock(global_lock_);
+	char ack[8];
+	write("VERC",4);
+	const uint8_t subtype = 0;
+	const uint8_t length  = 0;
+	write(reinterpret_cast<const char*>(&subtype), 1);
+	write(reinterpret_cast<const char*>(&length), 1);
+	size_t readlen = read(ack, 8);
+	if(readlen == 1 ){
+		if(ack[0] == '1'){
+			// バージョン問い合わせ関数未実装のスケッチの場合は全部 100 とする
+			return 1000;
+		}else{
+			return -1;
+		}
+	}else if(readlen == 2){
+		if(ack[1] == '1'){
+			return static_cast<short>(ack[0]);
+		}else{
+			return -2;
+		}
+	}else{
+		// 読み長さが異なる場合は異常
+		return -3;
+	}
+}
+
 
 void ArduinoSubsystem::connectionOpen()
 {

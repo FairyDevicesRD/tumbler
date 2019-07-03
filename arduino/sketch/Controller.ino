@@ -7,12 +7,14 @@
 
 //#define NDEBUG
 
+// 必要に応じてこのマクロを手動で変更すること、値は uint8_t であること
+#define __TUMBLER_SKETCH_VERSION__ 1010
+
 #include <Adafruit_NeoPixel.h>
 #include <Wire.h>
 
 #include "CapacitiveSensor.h"
 #include "Module.h"
-#include "Constants.h"
 #include "LEDRing.h"
 #include "TouchButtons.h"
 #include "LightSensor.h"
@@ -153,6 +155,12 @@ int serialRecv()
 	}
 
 	if(serial_eob_){
+		// v1.0 から追加
+		if(strcmp(serial_com_type_, "VERC") == 0){
+			uint8_t version = __TUMBLER_SKETCH_VERSION__;
+			Serial.write(version);
+		}
+
 		// 受信完了信号を返す
 		Serial.print('1');
 		Serial.flush();

@@ -24,7 +24,6 @@
  * limitations under the License.
  */
 
-#include <tumbler/buttons.h>
 #include <tumbler/irio.h>
 #include <iostream>
 #include <unistd.h>

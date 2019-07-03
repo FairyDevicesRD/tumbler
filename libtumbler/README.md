@@ -62,6 +62,10 @@ $ make install
 
 環境センサー及び光センサーはそれぞれデフォルトでは無効化されています（OS での I2C サポートが無効化されています）。環境センサーもしくは光センサーを有効にする場合、Tumbler の I2C サポートを有効にしておく必要があります。このために、`sudo raspi-config` コマンドを用いて、`5 Interfacing Options` を選択し、`P5 I2C` を選択し、I2C インターフェースを有効化してください。
 
+#### 赤外線 I/O を利用する場合の留意点
+
+GPIO を直接制御しなければならないため、プログラムの実行には root 権限が必要となります。
+
 ## libtumbler API
 
 ### API の概要
@@ -83,6 +87,30 @@ $ make install
 |[examples/irproximitysensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irproximitysensor.cpp)|赤外線 I/O による正面近接センサーの利用例|
 |[examples/irsignalreceiver.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irsignalreceiver.cpp)|赤外線 I/O による外部赤外線信号受信の利用例|
 |[examples/irall.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irall.cpp)|赤外線 I/O による正面近接センサーと、外部赤外線信号受信の同時利用例|
+|[examples/versioncheck.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/versioncheck.cpp)|libtumbler が通信する先の Arduino のスケッチのバージョン番号を返すサンプルプログラムの例|
+
+### Aruduino スケッチのバージョン確認
+
+#### ArduinoSubsystem クラス
+
+##### インスタンスの取得
+
+`ArduinoSubsystem& system = ArduinoSubsystem::getInsntance()` として ArduinoSubsytem クラスのインスタンスを取得します。引数はありません。
+
+##### sketchVersion()
+
+``````````.cpp
+int sketchVersion()
+``````````
+
+Arduino と通信し、Arduino スケッチのバージョン番号を確認します。この関数以外で、通常は ArduinoSubsystem クラス（の public 関数）を直接ユーザーが利用する必要はありません。返り値が負の値の場合、バージョン問い合わせ時にエラーが発生したことを示します。この関数の呼び出しには後方互換性があります。バージョン問い合わせ機能の無い以前のプログラムの場合、バージョン番号として一律に 1000 が返されます。
+
+###### 利用例
+
+``````````.cpp
+ArduinoSubsystem &system = ArduinoSubsystem::getInstance();
+int version = system.sketchVersion();
+``````````
 
 ### LED リング制御
 

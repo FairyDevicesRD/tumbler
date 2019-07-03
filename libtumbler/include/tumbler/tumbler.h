@@ -70,7 +70,19 @@ namespace tumbler
 		 */
 		void hardReset();
 
+		/**
+		 * @brief シリアル通信から読み込み可能な byte 数を返す
+		 * @note wiringPi の serialDataAvail() 関数と同じ
+		 * @return シリアル通信から読み込み可能な byte 数
+		 */
 		int dataAvail();
+
+
+		/**
+		 * @brief libtumbler が通信している Arduino 上に書き込まれた sketch のバージョン番号を返す
+		 * @return バージョン番号（正の整数値）、マイナスの値の場合、問い合わせに失敗したことを表す
+		 */
+		int sketchVersion();
 
 		/**
 		 * @brief read/write をまとめて外部からロックする
