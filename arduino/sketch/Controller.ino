@@ -8,7 +8,7 @@
 //#define NDEBUG
 
 // 必要に応じてこのマクロを手動で変更すること、値は uint8_t であること
-#define __TUMBLER_SKETCH_VERSION__ 1010
+#define __TUMBLER_SKETCH_VERSION__ 101
 
 #include <Adafruit_NeoPixel.h>
 #include <Wire.h>

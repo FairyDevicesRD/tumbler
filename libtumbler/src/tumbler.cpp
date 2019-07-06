@@ -87,7 +87,7 @@ int ArduinoSubsystem::sketchVersion()
 	if(readlen == 1 ){
 		if(ack[0] == '1'){
 			// バージョン問い合わせ関数未実装のスケッチの場合は全部 100 とする
-			return 1000;
+			return 100;
 		}else{
 			return -1;
 		}
