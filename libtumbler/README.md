@@ -78,10 +78,11 @@ GPIO を直接制御しなければならないため、プログラムの実行
 |---|---|
 | [examples/ledring.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/ledring.cpp) |LED リングの色、位置、組込アニメーション等を制御する簡単な利用例|
 |[examples/ledring2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/ledring2.cpp) |LED リングの外部制御アニメーションに関する利用例|
-|[examples/buttons.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons.cpp)|タッチボタンの利用例|
-|[examples/buttons2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons2.cpp)|タッチボタンの利用例に長押しの判定機能を追加した例|
+|[examples/buttons.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons.cpp)|タッチボタンの利用例（短押しの検出）|
+|[examples/buttons2.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons2.cpp)|タッチボタンの利用例に長押しの検出機能を追加した例|
 |[examples/buttons3.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|マルチタッチを禁止したタッチボタンの利用例|
 |[examples/buttons4.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|短押し、長押しを交えたタッチボタンによるアプリケーションの例|
+|[examples/buttons5.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|タッチボタンの利用例に、異なる方式での短押し、長押しの検出機能及び同時複数ボタン押し検出機能を追加した例|
 |[examples/envsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/envsensor.cpp)|環境センサーの利用例|
 |[examples/lightsensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/buttons3.cpp)|光センサーの利用例|
 |[examples/irproximitysensor.cpp](https://github.com/FairyDevicesRD/tumbler/blob/master/libtumbler/examples/irproximitysensor.cpp)|赤外線 I/O による正面近接センサーの利用例|

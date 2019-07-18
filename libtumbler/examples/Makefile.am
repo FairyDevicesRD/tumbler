@@ -20,6 +20,10 @@ bin_PROGRAMS+=buttons4
 buttons4_SOURCES=buttons4.cpp
 buttons4_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
 
+bin_PROGRAMS+=buttons5
+buttons5_SOURCES=buttons5.cpp
+buttons5_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
+
 bin_PROGRAMS+=ledring
 ledring_SOURCES=ledring.cpp
 ledring_LDADD=$(top_srcdir)/src/.libs/libtumbler.la
